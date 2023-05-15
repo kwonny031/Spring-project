@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.AlertMapper">
+
+	<!-- 알림 등록 -->
+	<insert id="insertAlert" parameterType="aleVO" useGeneratedKeys="true">
+		<selectKey keyProperty="aleCode" resultType="string" order="BEFORE">
+			SELECT 'ALE'||ALERT_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		/* kr.or.ddit.mapper.alertMapper_SQL.insertAlert */
+		INSERT INTO ALERT(
+			  ALE_CODE /* 알림코드 */
+			, EMP_NO /* 알림수신사원번호 */
+			, ALE_TYPE /* 알림업무구분 */
+			, ALE_DATE /* 알림생성일 */
+			, ALE_CONTENT /* 알림내용 */
+			, ALE_PATH /* 알림경로 */
+			, ALE_CHECK /* 알림확인여부 */
+		) VALUES (
+			  #{aleCode} /* 알림코드 */
+			, #{empNo} /* 알림수신사원번호 */
+			, #{aleType} /* 알림업무구분 */
+			, SYSDATE /* 알림생성일 */
+			, #{aleContent} /* 알림내용 */
+			, NULL /* 알림경로 */
+			, 'N' /* 알림확인여부 */
+		)
+	</insert>	
+	
+	<!-- ale 수정 -->
+	<update id="update" parameterType="aleVO">
+		UPDATE ALERT
+		SET	
+			ALE_CHECK = 'Y'
+		WHERE EMP_NO = #{empNo}
+		AND ALE_CONTENT = #{aleContent}
+	</update>	
+
+
+
+
+
+
+
+
+
+
+	<!--
+	공지사항 등록
+	<insert id="insertNotice" parameterType="noticeVO" useGeneratedKeys="true">
+		<selectKey keyProperty="boNo" resultType="int" order="BEFORE">
+			SELECT SEQ_NOTICE.NEXTVAL FROM DUAL
+		</selectKey>
+		/* kr.or.ddit.mapper.NoticeMapper.insertNotice */
+		INSERT INTO NOTICE(
+			  BO_NO /* 글번호 */
+			, BO_TITLE /* 글제목 */
+			, BO_CONTENT /* 글내용 */
+			, BO_WRITER /* 작성자 */
+			, BO_DATE /* 등록일 */
+		) VALUES (
+			  #{boNo} /* 글번호 */
+			, #{boTitle} /* 글제목 */
+			, #{boContent} /* 글내용 */
+			, #{boWriter} /* 작성자 */
+			, SYSDATE /* 등록일 */
+		)
+	</insert>	
+	
+	<select id="getFree" resultType="freeVO">
+		select
+			FREE_CODE, EMP_NO, FREE_TITLE, FREE_CONTENT, FREE_DATE, FREE_HIT					
+		from free
+		where FREE_CODE = #{freeCode}
+	</select>	
+	
+	<update id="updateNotice" parameterType="noticeVO">
+		update notice
+		set
+			bo_title = #{boTitle},
+			bo_content = #{boContent},
+			bo_date = sysdate
+		where bo_no = #{boNo}
+	</update>
+	
+	<delete id="deleteNotice" parameterType="int">
+		delete from notice
+		where bo_no = #{boNo}
+	</delete>	
+	
+	<select id="getFreeList" resultType="freeVO">
+		select
+			FREE_CODE, EMP_NO, FREE_TITLE, FREE_CONTENT, FREE_DATE, FREE_HIT			
+		from free
+	</select>
+	
+	-->
+</mapper>
+
+
+
+
+
+

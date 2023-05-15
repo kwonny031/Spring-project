@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.GoodMapper">
+
+	<select id="getGood" resultType="goodVO">
+		select
+		GOOD_CODE, EMP_NO,
+		GOOD_TYPE, GOOD_DATE, GOOD_PATH
+		from good
+		where
+		GOOD_TYPE = #{goodType}
+		ORDER BY GOOD_DATE DESC
+	</select>
+
+
+
+	<select id="goodList" resultType="goodVO">
+		select
+		GOOD_CODE, EMP_NO,
+		GOOD_TYPE, GOOD_DATE, GOOD_PATH
+		from good
+		where GOOD_TYPE =
+		#{goodType}
+		order by good_code desc
+	</select>
+
+	<insert id="insertGood" parameterType="goodVO"
+		useGeneratedKeys="true">
+		insert into good(
+		GOOD_CODE, EMP_NO, GOOD_TYPE,
+		GOOD_DATE
+		) VALUES (
+		('GOOD'||good_seq.nextval), #{empNo}, #{goodType},
+		SYSDATE
+		)
+	</insert>
+
+
+	<insert id="insertFree" parameterType="goodVO"
+		useGeneratedKeys="true">
+		insert into good(
+		GOOD_CODE, EMP_NO, GOOD_TYPE,
+		GOOD_DATE
+		) VALUES (
+		('GOOD'||good_seq.nextval), #{empNo}, #{goodType},
+		SYSDATE
+		)
+	</insert>
+
+	<!-- 나의 좋아요 List -->
+	<select id="getLikesByUsername" parameterType="string"
+		resultType="goodVO">
+		SELECT a.GOOD_CODE, a.EMP_NO, a.GOOD_TYPE, a.GOOD_DATE,
+		a.GOOD_PATH
+		FROM good a
+		LEFT JOIN free b ON a.GOOD_TYPE = b.FREE_CODE AND a.EMP_NO != #{myLikeNo}
+		LEFT JOIN notice c ON a.GOOD_TYPE = c.NOT_CODE AND a.EMP_NO !=
+		#{myLikeNo}
+		WHERE b.FREE_CODE IS NOT NULL OR c.NOT_CODE IS NOT NULL
+		
+
+	</select>
+
+	<resultMap type="goodVO" id="goodMap">
+		<result property="goodType" column="good_type"/>
+		<result property="empNo" column="emp_no"/>
+		<result property="goodDate" column="good_date"/>
+		
+		<collection property="empVO" resultMap="empMap"></collection>
+		<collection property="afVO" resultMap="afMap"></collection>
+		<collection property="aleVO" resultMap="aleMap"></collection>
+	</resultMap>
+
+	<resultMap type="empVO" id="empMap">
+		<result property="empName" column="emp_name"/>
+		<result property="empPos" column="emp_pos"/>
+	</resultMap>
+	<resultMap type="afVO" id="afMap">
+		<result property="afSave" column="af_save"/>
+	</resultMap>
+	<resultMap type="aleVO" id="aleMap">
+		<result property="aleCheck" column="ale_check"/>
+	</resultMap>
+
+	<!-- 상대방좋아요 List -->
+	<select id="getGoodList" resultMap="goodMap" parameterType="String">
+<!-- 		SELECT a.GOOD_CODE, a.EMP_NO, a.GOOD_TYPE, a.GOOD_DATE, -->
+<!-- 		a.GOOD_PATH -->
+<!-- 		FROM good a -->
+<!-- 		LEFT JOIN free b ON a.GOOD_TYPE = b.FREE_CODE AND a.EMP_NO != #{youLikeNo} -->
+<!-- 		LEFT JOIN notice c ON a.GOOD_TYPE = c.NOT_CODE AND a.EMP_NO != -->
+<!-- 		#{youLikeNo} -->
+<!-- 		WHERE b.FREE_CODE IS NOT NULL OR c.NOT_CODE IS NOT NULL -->
+<!-- 		order by good_date desc -->
+		SELECT
+		      A.GOOD_TYPE
+		    , A.GOOD_DATE
+		    , A.EMP_NO
+		    , E.EMP_NAME
+		    , E.EMP_POS
+		    , AT.AF_SAVE
+    		, AL.ALE_CHECK		    
+		FROM FREE F, (SELECT
+		                GOOD_TYPE, EMP_NO, GOOD_DATE
+		              FROM GOOD) A
+		LEFT OUTER JOIN EMPLOYEE E ON A.EMP_NO = E.EMP_NO
+		LEFT OUTER JOIN ATTFILE AT ON AT.AF_TYPE = 'PROFILE'
+					AND AT.AF_TCODE = A.EMP_NO
+		LEFT OUTER JOIN ALERT AL ON AL.ALE_TYPE = A.GOOD_TYPE
+		            AND AL.ALE_CONTENT = '새로운 좋아요'
+		WHERE A.GOOD_TYPE = F.FREE_CODE
+		AND F.EMP_NO = #{empNo}	
+		ORDER BY A.GOOD_DATE DESC
+	</select>
+	
+	<delete id="deleteGood">
+		DELETE FROM GOOD
+		WHERE 1=1
+		AND	GOOD_TYPE = #{goodType}
+		AND EMP_NO = #{empNo}	
+	</delete>
+
+
+
+</mapper>
+
+
+
+

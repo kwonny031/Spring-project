@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.AttfileMapper">
+
+	<select id="getAf" resultType="aFVO">
+		select
+			AF_CODE, AF_TYPE, AF_TCODE, AF_USE, AF_DATE, AF_NAME, AF_SAVE, AF_SIZE, AF_PATH, 
+			AF_EXT
+		from attfile
+		where
+			AF_TCODE = #{afTcode}	
+		AND
+			AF_TYPE = #{afType}
+	</select>
+	
+	<!-- 첨부파일 등록 -->
+	<insert id="insertAf" useGeneratedKeys="true">
+		<selectKey keyProperty="afCode" resultType="string" order="BEFORE">
+			SELECT 'AF'||ATTFILE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO ATTFILE (
+			  AF_CODE /* 첨부파일코드 */
+			, AF_TYPE /* 첨부파일업무구분 */
+			, AF_TCODE /* 대상코드 */
+			, AF_USE /* 사용구분 */
+			, AF_DATE /* 생성일 */
+			, AF_NAME /* 파일이름 */
+			, AF_SAVE /* 저장이름 */
+			, AF_SIZE /* 파일크기 */
+			, AF_PATH /* 저장경로 */
+			, AF_EXT /* 확장자 */
+		) VALUES (
+			  #{afCode}
+			, #{afType}
+			, #{afTcode}
+			, 'Y'
+			, SYSDATE
+			, #{afName}
+			, #{afSave}
+			, #{afSize}
+			, NULL
+			, #{afExt}
+		)
+	</insert>	
+	
+	<!-- 첨부파일 수정 -->
+	<insert id="updateAf">
+		UPDATE ATTFILE 
+		SET
+			  AF_USE = 'Y' /* 사용구분 */
+			, AF_DATE = SYSDATE /* 생성일 */
+			, AF_NAME = #{afName} /* 파일이름 */
+			, AF_SAVE = #{afSave} /* 저장이름 */
+			, AF_SIZE = #{afSize} /* 파일크기 */
+			, AF_EXT = #{afExt} /* 확장자 */
+		WHERE
+			AF_CODE = #{afCode} /* 첨부파일코드 */
+	</insert>	
+
+
+
+
+</mapper>
+
+
+
+

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.BoardMapper">
+
+	<resultMap type="postVO" id="postMap">
+		<id property="postCode" column="post_code"/>
+		<result property="boaCode" column="boa_code"/>
+		<result property="empNo" column="emp_no"/>
+		<result property="postTitle" column="post_title"/>
+		<result property="postDate" column="post_date"/>
+		<result property="postHit" column="post_hit"/>
+		<result property="postEss" column="post_ess"/>
+		<result property="postContent" column="post_content"/>
+		<collection property="postEmp" resultMap="postEmpMap"/>
+	</resultMap>
+	
+	<resultMap type="empVO" id="postEmpMap">
+		<id property="empNo" column="emp_no"/>
+		<result property="empPos" column="emp_pos"/>
+		<result property="empName" column="emp_name"/>
+	</resultMap>
+
+	<!-- 전체 게시판 목록 조회 -->
+	<select id="getBoaList" resultType="boaVO">
+		SELECT
+			  BOA_CODE /* 게시판코드 */
+			, CAT_CODE /* 카테고리코드 */
+			, DEP_CODE /* 게시판생성부서 */
+			, BOA_ICON /* 아이콘 */
+			, BOA_ANO /* 익명게시판여부 */
+			, BOA_NAME /* 게시판이름 */
+		FROM BOARD
+	</select>
+	
+	<!-- 게시판코드로 해당 게시판즐겨찾기 목록 조회 -->
+	<select id="getBfList" resultType="bfVO">
+		SELECT	
+			  EMP_NO /* 즐겨찾기사번 */
+			, BOA_CODE /* 게시판코드 */
+			, BF_FAV /* 즐겨찾기여부 */
+			, BF_WRITE /* 작성권한여부 */
+		FROM BOAFAV
+		WHERE 
+			BOA_CODE = #{boaCode}
+	</select>
+
+	<!-- 게시판코드로 게시판 조회 -->
+	<select id="getBoa" resultType="boaVO">
+		SELECT
+			  BOA_CODE /* 게시판코드 */
+			, CAT_CODE /* 카테고리코드 */
+			, DEP_CODE /* 게시판생성부서 */
+			, BOA_ICON /* 아이콘 */
+			, BOA_ANO /* 익명게시판여부 */
+			, BOA_NAME /* 게시판이름 */
+		FROM BOARD
+		WHERE 
+			  BOA_CODE = #{boaCode} /* 게시판코드 */
+	</select>
+
+	<!-- 게시글 입력 -->
+	<insert id="insertPost" useGeneratedKeys="true">
+		<selectKey keyProperty="postCode" resultType="string" order="BEFORE">
+			SELECT 'POST'||POST_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO POST (
+			  POST_CODE /* 게시글코드 */
+			, BOA_CODE /* 게시판번호 */
+			, EMP_NO /* 게시글작성사번 */
+			, POST_TITLE /* 제목 */
+			, POST_DATE /* 작성일 */
+			, POST_HIT /* 조회수 */
+			, POST_ESS /* 필수입력값 */
+			, POST_CONTENT /* 내용 */
+		) VALUES (
+			  #{postCode} /* 게시글코드 */
+			, #{boaCode} /* 게시판번호 */
+			, #{empNo} /* 게시글작성사번 */
+			, #{postTitle} /* 제목 */
+			, SYSDATE /* 작성일 */
+			, 0 /* 조회수 */
+			, #{postEss} /* 필수입력값 */
+			, #{postContent} /* 내용 */
+		)
+	</insert>
+
+	<!-- POST + EMP(POS, NAME) 목록 -->
+	<select id="getPostList" resultMap="postMap">
+		SELECT
+			  A.POST_CODE /* 게시글코드 */
+			, A.BOA_CODE /* 게시판번호 */
+			, A.EMP_NO /* 게시글작성사번 */
+			, A.POST_TITLE /* 제목 */
+			, A.POST_DATE /* 내용 */
+			, A.POST_HIT /* 작성일 */
+			, A.POST_ESS /* 조회수 */
+			, A.POST_CONTENT /* 필수입력값 */
+			, B.EMP_POS /* 직급 */
+			, B.EMP_NAME /* 사원이름 */
+		FROM 
+			POST A
+			, EMPLOYEE B
+		WHERE 1=1
+		AND	A.BOA_CODE = #{boaCode} /* 게시판번호 */
+		AND A.EMP_NO = B.EMP_NO(+)
+		ORDER BY A.POST_HIT DESC
+	</select>
+
+	<!-- 게시판의 게시글 수 조회 -->
+	<select id="getPostNum" resultType="string">
+		SELECT
+		    COUNT(POST_CODE)
+		FROM
+		    POST
+		WHERE
+		    BOA_CODE = #{boaCode} /* 게시판번호 */
+	</select>
+
+	<!-- 게시판의 최근 게시일 조회 -->
+	<select id="getRecDate" resultType="string">
+		SELECT
+		    B.C
+		FROM
+		    (
+		    SELECT
+		          SUBSTR(POST_ESS,1,10) AS C    
+		        , SUBSTR(POST_ESS,6,5) AS A
+		    FROM
+		        POST
+		    WHERE
+		        BOA_CODE = #{boaCode} /* 게시판번호 */        
+		    ORDER BY A DESC
+		    ) B
+		WHERE
+		    ROWNUM = 1	
+	</select>
+
+
+	<!--
+	공지사항 등록
+	<insert id="insertNotice" parameterType="noticeVO" useGeneratedKeys="true">
+		<selectKey keyProperty="boNo" resultType="int" order="BEFORE">
+			SELECT SEQ_NOTICE.NEXTVAL FROM DUAL
+
+		</selectKey>
+		/* kr.or.ddit.mapper.NoticeMapper.insertNotice */
+		INSERT INTO NOTICE(
+			  BO_NO /* 글번호 */
+			, BO_TITLE /* 글제목 */
+			, BO_CONTENT /* 글내용 */
+			, BO_WRITER /* 작성자 */
+			, BO_DATE /* 등록일 */
+		) VALUES (
+			  #{boNo} /* 글번호 */
+			, #{boTitle} /* 글제목 */
+			, #{boContent} /* 글내용 */
+			, #{boWriter} /* 작성자 */
+			, SYSDATE /* 등록일 */
+		)
+	</insert>	
+	
+	<select id="getFree" resultType="freeVO">
+		select
+			FREE_CODE, EMP_NO, FREE_TITLE, FREE_CONTENT, FREE_DATE, FREE_HIT					
+		from free
+		where FREE_CODE = #{freeCode}
+	</select>	
+	
+	<update id="updateNotice" parameterType="noticeVO">
+		update notice
+		set
+			bo_title = #{boTitle},
+			bo_content = #{boContent},
+			bo_date = sysdate
+		where bo_no = #{boNo}
+	</update>
+	
+	<delete id="deleteNotice" parameterType="int">
+		delete from notice
+		where bo_no = #{boNo}
+	</delete>	
+	
+	<select id="getFreeList" resultType="freeVO">
+		select
+			FREE_CODE, EMP_NO, FREE_TITLE, FREE_CONTENT, FREE_DATE, FREE_HIT			
+		from free
+	</select>
+	
+	-->
+</mapper>
+
+
+
+
+
+

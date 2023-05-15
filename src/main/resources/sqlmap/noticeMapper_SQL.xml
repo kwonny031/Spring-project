@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.NoticeMapper">
+
+	<select id="getNoticeList" resultType="noticeVO">
+		SELECT 
+			NOT_CODE, 
+			EMP_NO, 
+			NOT_TITLE, 
+			NOT_DATE, 
+			NOT_HIT, 
+			NOT_CONTENT, 
+			NOT_START, 
+			NOT_END, 
+			NOT_POP
+		FROM NOTICE
+		order by not_date desc
+	</select>
+
+	<select id="getNotice" resultType="noticeVO">
+		SELECT 
+			NOT_CODE, 
+			EMP_NO, 
+			NOT_TITLE, 
+			NOT_DATE, 
+			NOT_HIT, 
+			NOT_CONTENT, 
+			NOT_START, 
+			NOT_END, 
+			NOT_POP
+		FROM NOTICE
+		WHERE NOT_CODE = #{notCode}
+	</select>
+
+	<update id="incrementHit">
+		update notice
+		set
+			NOT_HIT = NOT_HIT + 1
+		where NOT_CODE = #{notCode}
+	</update>
+
+
+	<insert id="register" parameterType="noticeVO">
+	<selectKey keyProperty="notCode" resultType="string" order="BEFORE">
+		select 'NOTICE'||NOTICE_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
+	insert into NOTICE
+		(NOT_CODE, EMP_NO, NOT_TITLE, NOT_DATE, NOT_HIT, NOT_CONTENT, NOT_START, NOT_END, NOT_POP)
+	VALUES
+		(#{notCode},#{empNo},#{notTitle},sysdate,'0',#{notContent},#{notStart},#{notEnd},'Y')
+	</insert>
+
+	<update id="update" parameterType="noticeVO">
+		update NOTICE
+			set
+				NOT_TITLE = #{notTitle},
+				NOT_DATE = sysdate,
+				NOT_CONTENT = #{notContent},
+				NOT_START = #{notStart},
+				NOT_END = #{notEnd}
+		where NOT_CODE = #{notCode}
+	</update>
+
+	<delete id="delete" parameterType="String">
+		delete from notice where not_code = #{notCode}
+	</delete>
+
+	<!-- 최근 공지사항 4개 조회 -->
+	<select id="getRecNotList" resultType="noticeVO">
+		SELECT A.*
+		FROM(
+			SELECT 
+				NOT_CODE, /* 공지사항코드 */
+				EMP_NO, /* 공지사항등록사번 */ 
+				NOT_TITLE, /* 공지사항제목 */ 
+				NOT_CONTENT, /* 공지사항내용 */ 
+				NOT_DATE, /* 공지사항작성일 */ 
+				NOT_HIT, /* 공지사항조회수 */ 
+				NOT_START, /* 공지사항시작일 */ 
+				NOT_END, /* 공지사항종료일 */ 
+				NOT_POP /* 공지사항팝업 */
+			FROM NOTICE
+			ORDER BY NOT_CODE DESC) A	
+		<![CDATA[
+			WHERE ROWNUM < 7
+		]]>		
+	</select>
+
+
+
+	<!--
+	공지사항 등록
+	<insert id="insertNotice" parameterType="noticeVO" useGeneratedKeys="true">
+		<selectKey keyProperty="boNo" resultType="int" order="BEFORE">
+			SELECT SEQ_NOTICE.NEXTVAL FROM DUAL
+		</selectKey>
+		/* kr.or.ddit.mapper.NoticeMapper.insertNotice */
+		INSERT INTO NOTICE(
+			  BO_NO /* 글번호 */
+			, BO_TITLE /* 글제목 */
+			, BO_CONTENT /* 글내용 */
+			, BO_WRITER /* 작성자 */
+			, BO_DATE /* 등록일 */
+		) VALUES (
+			  #{boNo} /* 글번호 */
+			, #{boTitle} /* 글제목 */
+			, #{boContent} /* 글내용 */
+			, #{boWriter} /* 작성자 */
+			, SYSDATE /* 등록일 */
+		)
+	</insert>	
+	
+	<select id="getFree" resultType="freeVO">
+		select
+			FREE_CODE, EMP_NO, FREE_TITLE, FREE_CONTENT, FREE_DATE, FREE_HIT					
+		from free
+		where FREE_CODE = #{freeCode}
+	</select>	
+	
+	<update id="updateNotice" parameterType="noticeVO">
+		update notice
+		set
+			bo_title = #{boTitle},
+			bo_content = #{boContent},
+			bo_date = sysdate
+		where bo_no = #{boNo}
+	</update>
+	
+	<delete id="deleteNotice" parameterType="int">
+		delete from notice
+		where bo_no = #{boNo}
+	</delete>	
+	
+	<select id="getFreeList" resultType="freeVO">
+		select
+			FREE_CODE, EMP_NO, FREE_TITLE, FREE_CONTENT, FREE_DATE, FREE_HIT			
+		from free
+	</select>
+	
+	-->
+</mapper>
+
+
+
+
+
+

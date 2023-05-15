@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.ContactMapper">
+
+   <select id="getContactList" resultType="contactVO">
+      select
+         a.CON_CODE, a.AB_CODE, a.CON_NAME, a.CON_COMPANY, a.CON_DEP, a.CON_POS,
+            a.CON_EMAIL, a.CON_TEL, a.CON_ADDR, a.CON_MEMO, a.CON_DATE, a.CON_FAV, 
+            b.emp_no         
+      from contact A, addrbook B
+        where a.ab_code = b.ab_code
+        order by a.CON_NAME ASC
+        
+   </select>
+   
+   <!-- 기술지원본부 List -->
+   <select id="getTehList" resultType="contactVO">
+      select
+         CON_CODE, AB_CODE, CON_NAME, CON_COMPANY, CON_DEP, CON_POS, CON_EMAIL, CON_TEL, CON_ADDR, CON_MEMO, CON_DATE, CON_FAV         
+      from contact
+      where CON_DEP = '기술지원본부'
+   </select>
+   
+   <!-- 영업부 List -->
+   <select id="getSalesList" resultType="contactVO">
+      select
+         CON_CODE, AB_CODE, CON_NAME, CON_COMPANY, CON_DEP, CON_POS, CON_EMAIL, CON_TEL, CON_ADDR, CON_MEMO, CON_DATE, CON_FAV         
+      from contact
+      where CON_DEP = '영업부'
+   </select>
+   
+   
+   <!-- 관리본부 List -->
+   <select id="getMnList" resultType="contactVO">
+      select
+         CON_CODE, AB_CODE, CON_NAME, CON_COMPANY, CON_DEP, CON_POS, CON_EMAIL, CON_TEL, CON_ADDR, CON_MEMO, CON_DATE, CON_FAV         
+      from contact
+      where CON_DEP = '관리본부'
+   </select>
+   
+   
+   <!-- 네트워크기술부 List -->
+   <select id="getNtList" resultType="contactVO">
+      select
+         CON_CODE, AB_CODE, CON_NAME, CON_COMPANY, CON_DEP, CON_POS, CON_EMAIL, CON_TEL, CON_ADDR, CON_MEMO, CON_DATE, CON_FAV         
+      from contact
+      where CON_DEP = '네트워크기술부'
+   </select>
+
+   <!-- 보안기술부 List -->
+   <select id="getSecList" resultType="contactVO">
+      select
+         CON_CODE, AB_CODE, CON_NAME, CON_COMPANY, CON_DEP, CON_POS, CON_EMAIL, CON_TEL, CON_ADDR, CON_MEMO, CON_DATE, CON_FAV         
+      from contact
+      where CON_DEP = '보안기술부'
+       order by CON_NAME ASC
+   </select>
+   
+   
+   <insert id="register" parameterType="contactVO">
+      insert into contact(
+         CON_CODE, AB_CODE, CON_NAME, CON_COMPANY, CON_DEP, CON_POS, CON_EMAIL, CON_TEL, CON_ADDR, CON_MEMO, CON_DATE, CON_FAV
+      ) values (
+         ('CONTACT'||contact_seq.nextval), #{abCode}, #{conName}, #{conCompany}, #{conDep}, #{conPos}, #{conEmail}, #{conTel}, #{conAddr}, #{conMemo}, SYSDATE, 'N'
+      )
+   
+   </insert>
+
+   
+   
+    <!-- 사원리스트 삭제 -->
+   <delete id="deleteContactList" parameterType="contactVO">
+      delete
+      from contact
+      where con_code= #{conCode} 
+   </delete>
+
+	
+</mapper>

@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.MailMapper">
+
+	<select id="getMailList" parameterType="string"
+		resultType="mailVO">
+		select
+		MAIL_CODE, EMP_NO, MAIL_TITLE, MAIL_CONTENT, MAIL_IMP, MAIL_SAVE, MAIL_DATE,
+		MAIL_SEND
+		from mail
+	</select>
+
+	<!-- 경영자료 List -->
+	<select id="getMngList" parameterType="string"
+		resultType="mailVO">
+		select
+		MAIL_CODE, EMP_NO, MAIL_TITLE, MAIL_CONTENT, MAIL_DATE
+		from mail
+		where COM_CODE = 'M'
+	</select>
+
+	<!--회계자료 List -->
+	<select id="getActList" parameterType="string"
+		resultType="mailVO">
+		select
+		MAIL_CODE, EMP_NO, MAIL_TITLE, MAIL_CONTENT, MAIL_DATE
+		from mail
+		where COM_CODE = 'A'
+	</select>
+
+	<!-- 참고자료 List -->
+	<select id="getRefList" parameterType="string"
+		resultType="mailVO">
+		select
+		MAIL_CODE, EMP_NO, MAIL_TITLE, MAIL_CONTENT, MAIL_DATE
+		from mail
+		where COM_CODE = 'R'
+	</select>
+
+	<!-- 메일 작성하기 -->
+	<insert id="write" parameterType="mailVO"
+		useGeneratedKeys="true">
+		INSERT INTO MAILREC (
+		emp_no, MAIL_CODE, mr_date, mr_type
+		) VALUES (
+		#{empNo}, #{mailCode}, SYSDATE, 'N'
+		)
+	</insert>
+
+	<!-- 임시저장 메일 작성 -->
+	<insert id="outboxMail" parameterType="mailVO"
+		useGeneratedKeys="true">
+		INSERT INTO mail (
+		MAIL_CODE, EMP_NO, MAIL_TITLE, MAIL_CONTENT, MAIL_SAVE, MAIL_DATE
+		) VALUES (
+		(SELECT 'MAIL' || TRIM((NVL(MAX(TO_NUMBER(SUBSTR(MAIL_CODE,5))),0) +
+		1)) FROM MAIL)
+		, #{empNo}, #{mailTitle}, #{mailContent}, 'Y' , SYSDATE
+		)
+	</insert>
+
+	<!-- 보낸 쪽지함 목록 -->
+	<select id="selectSendList" parameterType="string"
+		resultType="mailVO">
+		select
+		m.MAIL_CODE, m.EMP_NO, m.MAIL_TITLE ,m.MAIL_CONTENT, m.MAIL_IMP, m.MAIL_SAVE,
+		m.MAIL_DATE,
+		(select EMP_NAME from EMPLOYEE where EMP_NO = mr.EMP_NO) as SEND_EMP_NO
+		from
+		MAIL m, MAILREC mr
+		where m.emp_no = #{empNo} and m.MAIL_CODE =
+		mr.MAIL_CODE(+) and m.MAIL_SAVE = 'N'
+		order by m.MAIL_DATE desc
+	</select>
+
+	<!-- 메일 발신 -->
+	<insert id="sendMail" parameterType="mailVO"
+		useGeneratedKeys="true">
+		<selectKey keyProperty="mailCode" resultType="string"
+			order="BEFORE">
+			SELECT 'MAIL'||MAIL_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO mail (
+		MAIL_CODE, EMP_NO, MAIL_TITLE, MAIL_CONTENT, MAIL_SAVE, MAIL_DATE
+		) VALUES(
+		#{mailCode}, #{empNo}, #{mailTitle}, #{mailContent}, 'N', SYSDATE
+		)
+	</insert>
+
+	<resultMap type="mailVO" id="mailMap">
+		<result property="mailCode" column="mail_code" /> 
+		<result property="empNo" column="emp_no" /> 
+		<result property="mailTitle" column="mail_title" /> 
+		<result property="mailContent" column="mail_content" />  
+		<result property="mailImp" column="mail_Imp" /> 
+		<result property="mailDate" column="mail_date" /> 
+		<result property="mailSave" column="mail_save" /> 
+		<result property="empName" column="emp_name" />
+		
+		<collection property="mailRecVOList" resultMap="mailRecMap"></collection>
+		<collection property="attFileVOList" resultMap="attFileMap"></collection>
+	</resultMap>
+
+	<resultMap type="mailRecVO" id="mailRecMap">
+		<result property="mailCode" column="mail_code" /> 
+		<result property="empNo" column="receiver" /> 
+	</resultMap>
+	
+	<resultMap type="aFVO" id="attFileMap">
+		<result property="afExt" column="af_ext" />
+		<result property="afTcode" column="af_tcode" />
+		<result property="afCode" column="af_code" />
+		<result property="afName" column="af_name" />
+		<result property="afSave" column="af_save" />
+	</resultMap>
+	
+	
+	
+	
+	
+	
+	<!-- 받는 메일함 (로그인 한 회원의 전체 받은 리스트)
+	m.emp_no : sender
+	mr.emp_no : receiver
+	sender : reci
+	-->
+	<select id="selectReceiveList" parameterType="string"
+		resultMap="mailMap">
+		select m.mail_code, m.emp_no, m.mail_title, m.mail_content 
+	         , m.mail_Imp, m.mail_date, m.mail_save
+	         , e.emp_name
+	         , mr.emp_no receiver
+	         , a.af_name, a.af_save
+		from mailrec mr
+		left outer join mail m on(m.mail_code = mr.mail_code)
+		left outer join employee e on(m.emp_no = e.emp_no)
+        left outer join attfile a on(mr.mail_code = a.af_tcode)
+		where 1=1
+        and mr.emp_no = #{empNo}
+		ORDER BY m.mail_date DESC
+	</select>
+	
+	<!-- 받는 메일함 (로그인 한 회원의 상세)
+	m.emp_no : sender
+	mr.emp_no : receiver
+	sender : reci
+	-->
+	<select id="selectReceiveDetail" parameterType="mailVO"
+		resultMap="mailMap">
+		select m.mail_code, m.emp_no, m.mail_title, m.mail_content 
+	         , m.mail_date, m.mail_save
+	         , a.af_name, a.af_save, a.af_Code, a.af_tcode, a.af_ext
+		from mailrec mr
+		left outer join mail m on(m.mail_code = mr.mail_code)
+        left outer join attfile a on(mr.mail_code = a.af_tcode)
+		where 1=1
+        and mr.emp_no = #{empNo} and m.mail_code= #{mailCode}
+		ORDER BY m.mail_date DESC
+	</select>
+
+	<update id="updateMail" parameterType="mailRecVO">
+		UPDATE MAILREC
+		SET MR_TYPE
+		= #{mrType}
+		where MAIL_CODE = #{mailCode}
+	</update>
+
+	<!-- 메일 태그 -->
+	<update id="updateTag" parameterType="mailVO">
+		UPDATE MAIL
+		SET COM_CODE =
+		#{comCode}
+		where MAIL_CODE = #{mailCode}
+	</update>
+
+	<!-- 메일 detail -->
+	<!--  <select id="getMail" resultType="mailVO">
+		select
+		MAIL_CODE, EMP_NO,
+		MAIL_TITLE, MAIL_CONTENT, MAIL_IMP, MAIL_DATE
+		from mail
+		where MAIL_CODE
+		= #{mailCode}
+	</select>-->
+	
+	<!-- 첨부파일 List -->
+ <select id="getMail" resultType="mailVO">
+  select 
+  MAIL_CODE
+  , EMP_NO
+  , MAIL_TITLE
+  , MAIL_CONTENT
+  , MAIL_IMP
+  , MAIL_DATE
+  from mail
+  where MAIL_CODE = #{mailCode}
+</select>
+
+	<select id="getStoreList" resultType="mailVO">
+		select
+		m.MAIL_CODE, m.EMP_NO, m.MAIL_TITLE, m.MAIL_CONTENT, m.MAIL_DATE
+		from mail m,
+		mailrec mr
+		where m.mail_code = mr.mail_code
+		and mr.mr_type = 'Y'
+	</select>
+
+	<select id="getOutboxList" parameterType="string"
+		resultType="mailVO">
+		select
+		MAIL_CODE, EMP_NO, MAIL_TITLE, MAIL_CONTENT, MAIL_SAVE, MAIL_DATE
+		from mail
+		where
+		mail_save = 'Y'
+	</select>
+
+	<!-- 받은 메일 삭제 -->
+	<delete id="deleteMail" parameterType="mailVO">
+		delete
+		from mail
+		where
+		MAIL_CODE = #{mailCode}
+	</delete>
+
+	<!-- 임시저장 detail -->
+	<select id="getoutboxMail" resultType="mailVO">
+		select
+		MAIL_CODE, EMP_NO,
+		MAIL_TiTLE, MAIL_CONTENT
+		from mail
+		where MAIL_CODE = #{mailCode}
+
+	</select>
+
+
+
+
+
+
+</mapper>
+
+
+
+
+
+

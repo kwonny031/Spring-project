@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.MessageMapper">
+
+	<select id="getMessageList" resultType="messageVO">
+		select
+		MES_CODE, EMP_NO, MES_CONTENT, MES_DATE
+		from message
+	</select>
+
+	<select id="getMessageListByEmpNo" resultType="messageVO">
+		select
+		MES_CODE, EMP_NO, MES_CONTENT, MES_DATE
+		from message
+
+	</select>
+
+	<!-- 쪽지 detail -->
+	<select id="getMessage" resultType="messageVO">
+		select
+		MES_CODE, EMP_NO, MES_CONTENT, MES_DATE
+		from message
+		where MES_CODE = #{mesCode}
+	</select>
+	
+	<!-- 메세지 수신 -->
+	<insert id="sendMessage" parameterType="messageVO"
+		useGeneratedKeys="true">
+		<selectKey keyProperty="mesCode" resultType="string"
+			order="BEFORE">
+			SELECT 'MES'||MESSAGE_SEQ.NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO message (
+		MES_CODE, EMP_NO, MES_CONTENT, MES_DATE, MES_SAVE, MES_DELETE
+		) VALUES (
+		#{mesCode}, #{empNo}, #{mesContent}, SYSDATE, 'N', 'N'
+		)
+	</insert>
+
+	<select id="getEmpNo" parameterType="string" resultType="string">
+		select
+		emp_no
+		from employee
+		where emp_name = #{empName}
+	</select>
+
+	<insert id="write" parameterType="messageVO"
+		useGeneratedKeys="true">
+		INSERT INTO mesrec (
+		MES_CODE, emp_no, mr_save, mr_delete
+		) VALUES (
+		#{mesCode}, #{empNo}, 'N', 'N'
+		)
+	</insert>
+
+	<!-- 받은 message삭제 -->
+	<delete id="deleteMsg" parameterType="messageVO">
+		delete
+		from message
+		where MES_CODE = #{mesCode}
+	</delete>
+
+	<!-- 받은 쪽지함 목록 -->
+	<select id="selectReceiveList" parameterType="string"
+		resultType="messageVO">
+		select
+			m.mes_code, m.emp_no, mes_content, mes_date, mes_save, m.mes_date, mes_delete,
+			e.emp_name, mr.mr_save
+		from mesrec mr left outer join message m on(m.mes_code = mr.mes_code)
+		left outer join employee e on(m.emp_no = e.emp_no)
+		where mr.emp_no = #{empNo}
+		order by m.MES_DATE desc
+
+	</select>
+	
+	<!-- 받은 쪽지함 detail -->
+	<select id="getMSG" resultType="messageVO">
+		select
+		MES_CODE, EMP_NO, MES_CONTENT, MES_DATE
+		from message
+		where MES_CODE = #{mesCode}
+ 
+	</select>
+
+	<!-- 보낸 쪽지함 목록 -->
+	<select id="selectSendList" parameterType="string"
+		resultType="messageVO">
+		select
+		m.MES_CODE, m.EMP_NO, m.MES_CONTENT, m.MES_DATE,
+		(select EMP_NAME from EMPLOYEE where EMP_NO = mr.EMP_NO) as SEND_EMP_NO
+		from
+		MESSAGE m, MESREC mr
+		where m.emp_no = #{empNo} and m.MES_CODE =
+		mr.MES_CODE(+)
+		order by m.MES_DATE desc
+	</select>
+
+	<!-- 받은쪽지 update -->
+	<update id="updateMsg" parameterType="mesrecVO">
+		UPDATE MESREC
+		SET MR_SAVE = #{mrSave}
+		WHERE MES_CODE = #{mesCode}
+	</update>
+	
+	<!-- store List -->
+	<select id="getStoreList" resultType="messageVO">
+	 	select 
+	 		m.MES_CODE, m.EMP_NO, m.MES_CONTENT, m.MES_DATE
+        from message m, mesrec mr
+        where m.mes_code = mr.mes_code
+        and mr.mr_save = 'Y'
+	</select>
+
+
+</mapper>
+	

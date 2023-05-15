@@ -1,0 +1,1005 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.AppMapper">
+<!--    <resultMap type="RecVO" id="recMap"> -->
+<!--       <result property="recCode" column="rec_code"/> -->
+<!--       <result property="appCode" column="app_code"/> -->
+<!--       <result property="depCode" column="dep_code"/> -->
+<!--       <result property="empPos" column="emp_pos"/> -->
+<!--       <result property="recReg" column="rec_reg"/> -->
+<!--       <result property="recName" column="rec_name"/> -->
+<!--       <result property="recAnn" column="rec_ann"/> -->
+<!--       <result property="recAcademy" column="rec_academy"/> -->
+<!--       <result property="recMajor" column="rec_major"/> -->
+<!--       <result property="recReason" column="rec_reason"/> -->
+<!--       <result property="recRec" column="rec_rec"/> -->
+<!--       <result property="recPcom" column="rec_pcom"/> -->
+<!--       <result property="recPdep" column="rec_pdep"/> -->
+<!--       <result property="recPperiod" column="rec_pperiod"/> -->
+<!--       <result property="recPann" column="rec_pann"/> -->
+<!--    </resultMap> -->
+
+
+   <select id="selectForm" parameterType="String" resultType="ApFormVO">
+      SELECT APF_CONTENT FROM APFORM
+         WHERE APF_NAME = #{APFNAME}
+   </select>
+
+   <insert id="create" parameterType="RecVO">
+      insert into recruit(
+         rec_code, app_code, dep_code, emp_pos, rec_reg, rec_name,
+         rec_ann, rec_academy, rec_major, rec_reason, rec_rec,
+         rec_pcom, rec_pdep, rec_pperiod, rec_pann
+      ) values(
+         #{recCode}, #{appCode}, #{depCode}, #{empPos}, #{recReg}, #{recName},
+         #{recAnn}, #{recAcademy}, #{recMajor}, #{recReason}, #{recRec},
+         #{recPcom}, #{recPdep}, #{recPperiod}, #{recPann}
+      )
+         
+   </insert>
+
+
+   <!-- ========================================   휴가신청서 인서트     ===============================================-->
+
+   <insert id="approvalInsert" >
+      /* kr.or.ddit.mapper.AppMapper.approvalInsert */
+      INSERT
+<!--       WHEN #{app.appStatus} = 0 THEN  -->
+      INTO APPROVAL(
+           APP_CODE      /*결재코드*/
+         , EMP_NO      /*기안사원번호*/
+         , APF_CODE      /*결재양식코드*/
+         , APP_YEAR      /*보존연한*/
+         , APP_DATE      /*작성일*/
+         , APP_STATUS   /*결재상태코드*/
+         , APP_URGENT   /*긴급여부*/
+         , APP_TITLE      /*제목*/
+      ) VALUES(
+           ('APP'||APPROVAL_SEQ.NEXTVAL)
+         , #{app.empNo}
+         , #{app.apfCode}
+         , #{app.appYear}
+         , #{app.appDate}
+         , #{app.appStatus}
+         , #{app.appUrgent}
+         , #{app.appTitle}
+      )
+   </insert>
+
+
+   <insert id="vacationInsert" >
+      /* kr.or.ddit.mapper.AppMapper.vacationInsert */
+           
+      INSERT INTO VACATION(
+           VAC_CODE      /*휴가신청서코드*/
+         , APP_CODE      /*결재코드*/
+         , VAC_START      /*시작일*/
+         , VAC_END      /*종료일*/
+         , VAC_TYPE      /*휴가종류*/
+         , VAC_CONTENT   /*사유*/
+         , VAC_TEL      /*긴습연락처*/
+         , VAC_DAY      /*사용일수*/
+      ) VALUES(
+           ('VAC'||VACATION_SEQ.NEXTVAL)
+         , ('APP'|| APPROVAL_SEQ.CURRVAL)
+         , #{vacation.vacStart}
+         , #{vacation.vacEnd}
+         , #{vacation.vacType}
+         , #{vacation.vacContent}
+         , #{vacation.vacTel}
+         , #{vacation.vacDay}
+      )
+   </insert>
+   
+   <insert id="appLineInsert">
+      /* kr.or.ddit.mapper.AppMapper.appLineInsert */
+             
+         INSERT INTO APLINE(
+            APL_NUM
+            , APP_CODE
+            , EMP_NO
+            , APL_POS
+            , APL_RESULT
+         ) VALUES(
+         	#{apline.aplNum}
+            , ('APP'|| APPROVAL_SEQ.CURRVAL)
+            , #{apline.empNo}
+            , #{apline.aplPos}
+            , 0
+         )
+   
+   </insert>
+     
+   <!-- ========================================   휴가신청서 인서트 END    ===============================================-->
+   
+   
+   
+   
+   <select id="getAppList" resultType="AppVO">
+      /*kr.or.ddit.mapper.AppMapper.getAppList*/
+      SELECT
+         APP_CODE         	/*결재코드*/
+         , EMP_NO         	/*기안사원번호*/
+         , APF_CODE         /*결재양식코드*/
+         , APP_YEAR         /*보존연한*/
+         , APP_DATE         /*작성일*/
+         , APP_REPDATE      /*상신일*/
+         , APP_STATUS      	/*결재상태코드*/
+         , APP_URGENT      	/*긴급여부*/
+         , APP_COMMENT      /*기안의견*/
+         , APP_CONTENT      /*내용*/
+         , APP_TITLE        /*제목*/
+         , APP_REF         	/*참조기안번호*/
+      FROM APPROVAL
+      ORDER BY APP_DATE DESC
+   </select>
+   
+   <resultMap type="AppIngVO" id="appIng">
+   		<collection property="app" resultMap="map15"/>
+   		<collection property="apline" resultMap="map25"/>
+   </resultMap>
+   
+   <resultMap type="AppVO" id="map15">
+   	<result property="appCode" column="app_code"/>
+   	<result property="empNo" column="emp_no"/>
+   	<result property="apfCode" column="apf_code"/>
+   	<result property="appYear" column="app_year"/>
+   	<result property="appDate" column="app_date"/>
+   	<result property="appRepdate" column="app_repdate"/>
+   	<result property="appStatus" column="app_status"/>
+   	<result property="appUrgent" column="app_urgent"/>
+   	<result property="appComment" column="app_comment"/>
+   	<result property="appContent" column="app_content"/>
+   	<result property="appTitle" column="app_title"/>
+   	<result property="appRef" column="app_reg"/>
+   </resultMap>
+   
+   <resultMap type="AplineVO" id="map25">
+   	<result property="aplResult" column="apl_result"/>
+   	</resultMap>
+   
+<!--    진행중인 문서 리스트 -->
+   <select id="getAppListByEmpNo" resultMap="appIng">
+      /*kr.or.ddit.mapper.AppMapper.getAppListByEmpNo*/
+      SELECT
+	            A.APP_CODE         	/*결재코드*/
+	         , A.EMP_NO         	/*기안사원번호*/
+	         , A.APF_CODE         	/*결재양식코드*/
+	         , A.APP_YEAR         	/*보존연한*/
+	         , A.APP_DATE         	/*작성일*/
+	         , A.APP_REPDATE      	/*상신일*/
+	         , A.APP_STATUS      	/*결재상태코드*/
+	         , A.APP_URGENT      	/*긴급여부*/
+	         , A.APP_COMMENT     	/*기안의견*/
+	         , A.APP_CONTENT      	/*내용*/
+	         , A.APP_TITLE         	/*제목*/
+	         , A.APP_REF         	/*참조기안번호*/
+	         , B.APL_RESULT			/*결재상태*/
+      	FROM APPROVAL A 
+        LEFT OUTER JOIN (SELECT 
+                               APL_RESULT
+                             , APP_CODE
+                           FROM APLINE
+                           WHERE
+                              APL_RESULT = (SELECT MAX(APL_RESULT)
+                        						FROM APLINE ))B
+         ON B.APP_CODE = A.APP_CODE 
+          WHERE
+         		A.EMP_NO = #{empNo}
+         		AND A.APP_STATUS = '0' 
+         ORDER BY A.APP_DATE DESC
+        
+   </select>
+   
+<!--    결재완료 문서 리스트 -->
+   <select id="getAppEndListByEmpNo" resultMap="appIng">
+      /*kr.or.ddit.mapper.AppMapper.getAppEndListByEmpNo*/
+      SELECT
+	            A.APP_CODE         /*결재코드*/
+	         , A.EMP_NO         /*기안사원번호*/
+	         , A.APF_CODE         /*결재양식코드*/
+	         , A.APP_YEAR         /*보존연한*/
+	         , A.APP_DATE         /*작성일*/
+	         , A.APP_REPDATE      /*상신일*/
+	         , A.APP_STATUS      /*결재상태코드*/
+	         , A.APP_URGENT      /*긴급여부*/
+	         , A.APP_COMMENT      /*기안의견*/
+	         , A.APP_CONTENT      /*내용*/
+	         , A.APP_TITLE         /*제목*/
+	         , A.APP_REF         /*참조기안번호*/
+	         , B.APL_RESULT		/*결재상태*/
+      	FROM APPROVAL A 
+        LEFT OUTER JOIN (SELECT 
+                               APL_RESULT
+                             , APP_CODE
+                           FROM APLINE
+                           WHERE
+                              APL_RESULT = (SELECT MAX(APL_RESULT)
+                        						FROM APLINE ))B
+         ON B.APP_CODE = A.APP_CODE 
+          WHERE
+         		A.EMP_NO = #{empNo}
+         		AND A.APP_STATUS = '1' 
+   </select>
+   
+   
+   
+	<resultMap type="AppVO" id="appMainMap">
+	
+		<result property="appCode" column="app_code"/>	
+		<result property="empNo" column="emp_no"/>	
+		<result property="apfCode" column="apf_code"/>	
+		<result property="appYear" column="app_year"/>	
+		<result property="appDate" column="app_date"/>	
+		<result property="appRepdate" column="app_repdate"/>	
+		<result property="appStatus" column="app_status"/>	
+		<result property="appUrgent" column="app_urgent"/>	
+		<result property="appComment" column="app_comment"/>	
+		<result property="appContent" column="app_content"/>	
+		<result property="appTitle" column="app_title"/>	
+		<result property="appRef" column="app_ref"/>	
+		
+		<collection property="empVO" resultMap="empMap"></collection>
+	</resultMap>
+	
+	<resultMap type="empVO" id="empMap">
+		<result property="empName" column="emp_name" /> 
+		<result property="empPos" column="emp_pos" /> 
+	</resultMap>	
+   
+	<!--    결재할 문서 리스트 -->
+   <select id="getAppLineListByEmpNo" resultMap="appMainMap">
+      /*kr.or.ddit.mapper.AppMapper.getAppLineListByEmpNo*/
+		SELECT
+		   A.APP_CODE
+		 , A.EMP_NO
+		 , A.APF_CODE
+		 , A.APP_YEAR
+		 , A.APP_DATE
+		 , A.APP_REPDATE
+		 , A.APP_STATUS
+		 , A.APP_URGENT
+		 , A.APP_COMMENT
+		 , A.APP_CONTENT
+		 , A.APP_TITLE
+		 , A.APP_REF
+		 
+		 , E.EMP_NAME
+		 , E.EMP_POS
+		FROM APPROVAL A
+		LEFT OUTER JOIN EMPLOYEE E ON(A.EMP_NO = E.EMP_NO)	
+		WHERE A.APP_CODE IN
+		   (SELECT APP_CODE FROM
+		       (
+		           WITH T AS(
+		               SELECT APL_NUM, APP_CODE, EMP_NO, APL_RESULT, APL_DATE, APL_COMMENT, APL_POS, APL_FAV
+		                    , NVL(LAG(APL_RESULT) OVER(ORDER BY APL_NUM),'1') BEFYN
+		               FROM   APLINE
+		               )
+		               SELECT * FROM T
+		                   WHERE  T.EMP_NO = #{empNo}
+		                   AND T.APL_RESULT = '0'
+<!--                            AND T.BEFYN = '1' -->
+		    ))
+		AND A.APP_STATUS = 0           
+   </select>
+   
+<!--    임시저장 리스트 -->
+	<select id="getTempstListByEmpNo" resultMap="appIng">
+	/*kr.or.ddit.mapper.AppMapper.getTempstListByEmpNo*/
+		  SELECT
+         APP_CODE         /*결재코드*/
+         , EMP_NO         /*기안사원번호*/
+         , APF_CODE         /*결재양식코드*/
+         , APP_YEAR         /*보존연한*/
+         , APP_DATE         /*작성일*/
+         , APP_REPDATE      /*상신일*/
+         , APP_STATUS      /*결재상태코드*/
+         , APP_URGENT      /*긴급여부*/
+         , APP_COMMENT      /*기안의견*/
+         , APP_CONTENT      /*내용*/
+         , APP_TITLE         /*제목*/
+         , APP_REF         /*참조기안번호*/
+      FROM APPROVAL
+      WHERE APP_STATUS = '3'
+	</select>   
+ 
+   <!-- ========================================   채용품의서 인서트    =============================================== -->
+   
+   <insert id="approvalRecInsert" >
+      /* kr.or.ddit.mapper.AppMapper.approvalRecInsert */
+      INSERT
+      INTO APPROVAL(
+           APP_CODE      /*결재코드*/
+         , EMP_NO      /*기안사원번호*/
+         , APF_CODE      /*결재양식코드*/
+         , APP_YEAR      /*보존연한*/
+         , APP_DATE      /*작성일*/
+         , APP_STATUS   /*결재상태코드*/
+         , APP_URGENT   /*긴급여부*/
+         , APP_TITLE      /*제목*/
+      ) VALUES(
+           ('APP'||APPROVAL_SEQ.NEXTVAL)
+         , #{app.empNo}
+         , #{app.apfCode}
+         , #{app.appYear}
+         , #{app.appDate}
+         , #{app.appStatus}
+         , #{app.appUrgent}
+         , #{app.appTitle}
+      )
+   </insert>
+
+
+   <insert id="recruitInsert" >
+      /* kr.or.ddit.mapper.AppMapper.recruitInsert */
+           
+      INSERT INTO RECRUIT(
+           REC_CODE      /*채용품의서코드*/
+         , APP_CODE      /*결재코드*/
+         , DEP_CODE      /*부서코드*/
+         , EMP_POS       /*직급코드*/
+         , REC_REG       /*주민등록번호*/
+         , REC_NAME       /*이름*/
+         , REC_ANN       /*연봉*/
+         , REC_ACADEMY   /*학력*/
+         , REC_MAJOR     /*전공*/
+         , REC_REASON    /*사유*/
+         , REC_REC       /*추천인*/
+         , REC_PCOM      /*전직장명*/
+         , REC_PPOS      /*전직급*/
+         , REC_PDEP      /*전부서*/
+         , REC_PPERIOD   /*전직장근무기간*/
+         , REC_PANN      /*전연봉*/
+      ) VALUES(
+           ('REC'||RECRUIT_SEQ.NEXTVAL)
+         , ('APP'|| APPROVAL_SEQ.CURRVAL)
+         , #{rec.depCode}
+         , #{rec.empPos}
+         , #{rec.recReg}
+         , #{rec.recName}
+         , #{rec.recAnn}
+         , #{rec.recAcademy}
+         , #{rec.recMajor}
+         , #{rec.recReason}
+         , #{rec.recRec}
+         , #{rec.recPcom}
+         , #{rec.recPpos}
+         , #{rec.recPdep}
+         , #{rec.recPperiod}
+         , #{rec.recPann}
+      )
+   </insert>
+   
+   <insert id="appLineRecInsert">
+      /* kr.or.ddit.mapper.AppMapper.appLine1RecInsert */
+             
+         INSERT INTO APLINE(
+            APL_NUM
+            , APP_CODE
+            , EMP_NO
+            , APL_POS
+            , APL_RESULT
+         ) VALUES(
+            #{apline.aplNum}
+            , ('APP'|| APPROVAL_SEQ.CURRVAL)
+            , #{apline.empNo}
+            , #{apline.aplPos}
+            , 0
+         )
+   
+   </insert>
+   
+   <!-- ========================================   채용품의서 인서트  END  =============================================== -->
+     
+   <!-- ========================================  vacation 임시저장   =============================================== --> 
+   <insert id="approvalTempst" >
+      /* kr.or.ddit.mapper.AppMapper.approvalTempst */
+      INSERT
+      INTO APPROVAL(
+           APP_CODE      /*결재코드*/
+         , EMP_NO      /*기안사원번호*/
+         , APF_CODE      /*결재양식코드*/
+         , APP_YEAR      /*보존연한*/
+         , APP_DATE      /*작성일*/
+         , APP_STATUS   /*결재상태코드*/
+         , APP_URGENT   /*긴급여부*/
+         , APP_TITLE      /*제목*/
+      ) VALUES(
+           ('APP'||APPROVAL_SEQ.NEXTVAL)
+         , #{app.empNo}
+         , #{app.apfCode}
+         , #{app.appYear}
+         , #{app.appDate}
+         , #{app.appStatus}
+         , #{app.appUrgent}
+         , #{app.appTitle}
+      )
+   </insert>
+   
+   
+   <insert id="vacationTempst">
+   	/* kr.or.ddit.mapper.AppMapper.vacationTempst */
+   	
+	   	INSERT INTO VACATION(
+	           VAC_CODE      /*휴가신청서코드*/
+	         , APP_CODE      /*결재코드*/
+	         , VAC_START      /*시작일*/
+	         , VAC_END      /*종료일*/
+	         , VAC_TYPE      /*휴가종류*/
+	         , VAC_CONTENT   /*사유*/
+	         , VAC_TEL      /*긴습연락처*/
+	         , VAC_DAY      /*사용일수*/
+	      ) VALUES(
+	           ('VAC'||VACATION_SEQ.NEXTVAL)
+	         , ('APP'|| APPROVAL_SEQ.CURRVAL)
+	         , #{vacation.vacStart}
+	         , #{vacation.vacEnd}
+	         , #{vacation.vacType}
+	         , #{vacation.vacContent}
+	         , #{vacation.vacTel}
+	         , #{vacation.vacDay}
+	      )
+   </insert>
+   <!-- ========================================   임시저장  END  =============================================== -->
+   
+   
+   <!-- ========================================  recruit 임시저장   =============================================== --> 
+   <insert id="approvalReTempst" >
+      /* kr.or.ddit.mapper.AppMapper.approvalReTempst */
+      INSERT
+      INTO APPROVAL(
+           APP_CODE      /*결재코드*/
+         , EMP_NO      /*기안사원번호*/
+         , APF_CODE      /*결재양식코드*/
+         , APP_YEAR      /*보존연한*/
+         , APP_DATE      /*작성일*/
+         , APP_STATUS   /*결재상태코드*/
+         , APP_URGENT   /*긴급여부*/
+         , APP_TITLE      /*제목*/
+      ) VALUES(
+           ('APP'||APPROVAL_SEQ.NEXTVAL)
+         , #{app.empNo}
+         , #{app.apfCode}
+         , #{app.appYear}
+         , #{app.appDate}
+         , #{app.appStatus}
+         , #{app.appUrgent}
+         , #{app.appTitle}
+      )
+   </insert>
+   
+   
+   <insert id="recruitTempst">
+   	/* kr.or.ddit.mapper.AppMapper.recruitTempst */
+   	
+	   	INSERT INTO RECRUIT(
+           REC_CODE      /*채용품의서코드*/
+         , APP_CODE      /*결재코드*/
+         , DEP_CODE      /*부서코드*/
+         , EMP_POS       /*직급코드*/
+         , REC_REG       /*주민등록번호*/
+         , REC_NAME       /*이름*/
+         , REC_ANN       /*연봉*/
+         , REC_ACADEMY   /*학력*/
+         , REC_MAJOR     /*전공*/
+         , REC_REASON    /*사유*/
+         , REC_REC       /*추천인*/
+         , REC_PCOM      /*전직장명*/
+         , REC_PPOS      /*전직급*/
+         , REC_PDEP      /*전부서*/
+         , REC_PPERIOD   /*전직장근무기간*/
+         , REC_PANN      /*전연봉*/
+      ) VALUES(
+           ('REC'||RECRUIT_SEQ.NEXTVAL)
+         , ('APP'|| APPROVAL_SEQ.CURRVAL)
+         , #{rec.depCode}
+         , #{rec.empPos}
+         , #{rec.recReg}
+         , #{rec.recName}
+         , #{rec.recAnn}
+         , #{rec.recAcademy}
+         , #{rec.recMajor}
+         , #{rec.recReason}
+         , #{rec.recRec}
+         , #{rec.recPcom}
+         , #{rec.recPpos}
+         , #{rec.recPdep}
+         , #{rec.recPperiod}
+         , #{rec.recPann}
+      )
+   </insert>
+   <!-- ========================================   임시저장  END  =============================================== -->
+   
+   
+   <!-- ========================================   vacation 결재 detail  =============================================== -->
+   
+   <resultMap type="VacationAppFormVO" id="appMap">
+   	<collection property="vacation" resultMap="map1"/>
+   	<collection property="app" resultMap="map3"/>
+   	<collection property="emp" resultMap="map4"/>
+   	<collection property="apline" resultMap="map5"/>
+   </resultMap>
+   
+   <resultMap type="VacationVO" id="map1">
+   	<result property="vacCode" column="vac_code"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="vacStart" column="vac_start"/>
+   	<result property="vacEnd" column="vac_end"/>
+   	<result property="vacType" column="vac_type"/>
+   	<result property="vacContent" column="vac_content"/>
+   	<result property="vacTel" column="vac_tel"/>
+   	<result property="vacDay" column="vac_day"/>
+   </resultMap>
+   
+   <resultMap type="AppVO" id="map3">
+   	<result property="appDate" column="app_date"/>
+   </resultMap>
+   
+   <resultMap type="empVO" id="map4">
+   	<result property="empName" column="emp_name"/>
+   	<result property="empPv" column="emp_pv"/>
+   </resultMap>
+   
+   <resultMap type="AplineVO" id="map5">
+   	<result property="empNo" column="emp_no"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="aplNum" column="apl_num"/>
+   	<result property="aplName" column="apl_name"/>
+   	<result property="aplResult" column="apl_result"/>
+   </resultMap>
+   
+   <select id="selectVacationAppForm" parameterType="AppVO" resultMap="appMap">
+   /* kr.or.ddit.mapper.AppMapper.selectVacationAppForm */
+   		SELECT
+   			A.VAC_CODE      	/*휴가신청서코드*/
+         	, A.APP_CODE      	/*결재코드*/
+         	, A.VAC_START      	/*시작일*/
+         	, A.VAC_END      	/*종료일*/
+         	, A.VAC_TYPE      	/*휴가종류*/
+         	, A.VAC_CONTENT   	/*사유*/
+         	, A.VAC_TEL      	/*긴급연락처*/
+         	, A.VAC_DAY      	/*사용일수*/
+            , B.APP_DATE		/*작성일자*/
+            , B.EMP_NAME		/*작성자이름*/
+            , B.EMP_PV			/*잔여연차*/
+            , B.EMP_NO			/*결재자 번호*/
+            , E.EMP_NAME AS APL_NAME	/*결재자이름*/
+            , B.APL_NUM			/*결재순번*/
+            , B.APL_RESULT
+        FROM VACATION A 
+        LEFT OUTER JOIN (SELECT 
+                            C.APP_DATE
+                            , C.APP_CODE
+                            , C.APF_CODE
+                            , D.EMP_NAME
+                            , D.EMP_PV
+                            , E.EMP_NO
+                            , E.APL_NUM
+                            , E.APL_RESULT
+                        FROM APPROVAL C
+                        LEFT OUTER JOIN EMPLOYEE D
+                            ON C.EMP_NO = D.EMP_NO
+                        LEFT OUTER JOIN APLINE E
+                            ON C.APP_CODE = E.APP_CODE
+                        WHERE
+                            C.EMP_NO = #{empNo}) B 
+            ON A.APP_CODE = B.APP_CODE
+        LEFT OUTER JOIN EMPLOYEE E
+        	ON B.EMP_NO = E.EMP_NO
+        WHERE
+         A.APP_CODE = #{appCode}
+   </select>
+   
+   <select id="selectTest" parameterType="string" resultType="AppVO">
+   	select * from APPROVAL where app_code = #{appCode}
+   </select>
+   <!-- ========================================   vacation 결재 detail END =============================================== -->
+
+	<!-- 	결재하기 -->
+   <update id="aplineUpdate" parameterType="String">
+   		UPDATE APLINE
+     		SET APL_RESULT = 1
+     		WHERE APP_CODE = #{appCode}
+     		AND EMP_NO = #{empNo}
+   </update>
+   
+   	<!-- 	3번이 결재하기 -->
+   <update id="aplineTopUpdate" parameterType="String">
+   		UPDATE APPROVAL
+     		SET APP_STATUS = 1
+     		WHERE APP_CODE = #{appCode}
+<!--      		AND EMP_NO = #{empNo} -->
+   </update>
+   
+   
+	<!--    반려하기 -->
+   <update id="companion" parameterType="String">
+   		UPDATE APLINE
+   			SET 
+	   			APL_RESULT = 2
+	   			, APL_COMMENT = #{aplComment}
+	   			, APL_DATE = SYSDATE
+   			WHERE APP_CODE = #{appCode}
+   			AND EMP_NO = #{empNo}
+   </update>
+   
+   
+   
+   
+   <!-- ========================================   recruit 결재 detail  =============================================== -->
+   
+   <resultMap type="RecruitAppFormVO" id="appMap2">
+   	<collection property="recruit" resultMap="map12"/>
+   	<collection property="app" resultMap="map32"/>
+   	<collection property="emp" resultMap="map42"/>
+   	<collection property="apline" resultMap="map52"/>
+   </resultMap>
+   
+   <resultMap type="RecVO" id="map12">
+   	<result property="recCode" column="rec_code"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="depCode" column="dep_code"/>
+   	<result property="empPos" column="emp_pos"/>
+   	<result property="recReg" column="rec_reg"/>
+   	<result property="recName" column="rec_name"/>
+   	<result property="recAnn" column="rec_ann"/>
+   	<result property="recAcademy" column="rec_academy"/>
+   	<result property="recMajor" column="rec_major"/>
+   	<result property="recReason" column="rec_reason"/>
+   	<result property="recRec" column="rec_rec"/>
+   	<result property="recPcom" column="rec_pcom"/>
+   	<result property="recPpos" column="rec_ppos"/>
+   	<result property="recPdep" column="rec_pdep"/>
+   	<result property="recPperiod" column="rec_pperiod"/>
+   	<result property="recPann" column="rec_pann"/>
+   </resultMap>
+   
+   <resultMap type="AppVO" id="map32">
+   	<result property="appDate" column="app_date"/>
+   </resultMap>
+   
+   <resultMap type="empVO" id="map42">
+   	<result property="empName" column="emp_name"/>
+   </resultMap>
+   
+   <resultMap type="AplineVO" id="map52">
+   	<result property="empNo" column="emp_no"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="aplNum" column="apl_num"/>
+   	<result property="aplName" column="apl_name"/>
+   	<result property="aplResult" column="apl_result"/>
+   </resultMap>
+   
+   <select id="selectRecruitAppForm" parameterType="AppVO" resultMap="appMap2">
+   /* kr.or.ddit.mapper.AppMapper.selectVacationAppForm */
+   		SELECT
+   			A.REC_CODE
+            , A.APP_CODE
+            , A.DEP_CODE
+            , A.EMP_POS
+            , A.REC_REG
+            , A.REC_NAME
+            , A.REC_ANN
+            , A.REC_ACADEMY
+            , A.REC_MAJOR
+            , A.REC_REASON
+            , A.REC_REC
+            , A.REC_PCOM
+            , A.REC_PPOS
+            , A.REC_PDEP
+            , A.REC_PPERIOD
+            , A.REC_PANN
+            , B.APP_DATE		/*작성일자*/
+            , B.EMP_NAME		/*작성자이름*/
+            , B.EMP_NO			/*결재자 번호*/
+            , E.EMP_NAME AS APL_NAME	/*결재자이름*/
+            , B.APL_NUM			/*결재순번*/
+            , B.APL_RESULT
+        FROM RECRUIT A 
+        LEFT OUTER JOIN (SELECT 
+                            C.APP_DATE
+                            , C.APP_CODE
+                            , C.APF_CODE
+                            , D.EMP_NAME
+                            , E.EMP_NO
+                            , E.APL_NUM
+                            , E.APL_RESULT
+                        FROM APPROVAL C
+                        LEFT OUTER JOIN EMPLOYEE D
+                            ON C.EMP_NO = D.EMP_NO
+                        LEFT OUTER JOIN APLINE E
+                            ON C.APP_CODE = E.APP_CODE
+                        WHERE
+                            C.EMP_NO = #{empNo}) B 
+            ON A.APP_CODE = B.APP_CODE
+        LEFT OUTER JOIN EMPLOYEE E
+        	ON B.EMP_NO = E.EMP_NO
+        WHERE
+         A.APP_CODE = #{appCode}
+   </select>
+   
+   <select id="selectTest2" parameterType="string" resultType="AppVO">
+   	select * from APPROVAL where app_code = #{appCode}
+   </select>
+   
+   <select id="selectAtt" parameterType="String" resultType="String">
+		/* kr.or.ddit.mapper.approvalMapper.selectAtt */ 
+		select 
+    		  B.AF_SAVE         /* 첨부파일 */  
+		 from 	APPROVAL A, ATTFILE B
+		where B.AF_TCODE = A.APP_CODE
+		  and A.APP_CODE = #{appCode}
+	</select>
+   
+   
+   <!-- ========================================   recruit 결재 detail END =============================================== -->
+   
+   
+   <!-- ========================================   vacation Ing detail  =============================================== -->
+   
+   <resultMap type="VacationAppFormVO" id="appMap3">
+   	<collection property="vacation" resultMap="map13"/>
+   	<collection property="app" resultMap="map33"/>
+   	<collection property="emp" resultMap="map43"/>
+   	<collection property="apline" resultMap="map53"/>
+   </resultMap>
+   
+   <resultMap type="VacationVO" id="map13">
+   	<result property="vacCode" column="vac_code"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="vacStart" column="vac_start"/>
+   	<result property="vacEnd" column="vac_end"/>
+   	<result property="vacType" column="vac_type"/>
+   	<result property="vacContent" column="vac_content"/>
+   	<result property="vacTel" column="vac_tel"/>
+   	<result property="vacDay" column="vac_day"/>
+   </resultMap>
+   
+   <resultMap type="AppVO" id="map33">
+   	<result property="appDate" column="app_date"/>
+   </resultMap>
+   
+   <resultMap type="empVO" id="map43">
+   	<result property="empName" column="emp_name"/>
+   	<result property="empPv" column="emp_pv"/>
+   </resultMap>
+   
+   <resultMap type="AplineVO" id="map53">
+   	<result property="empNo" column="emp_no"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="aplNum" column="apl_num"/>
+   	<result property="aplName" column="apl_name"/>
+   	<result property="aplResult" column="apl_result"/>
+   	<result property="aplComment" column="apl_comment"/>
+   </resultMap>
+   
+   <select id="selectVacationIngForm" parameterType="AppVO" resultMap="appMap3">
+   /* kr.or.ddit.mapper.AppMapper.selectVacationIngForm */
+   		SELECT
+   			A.VAC_CODE      	/*휴가신청서코드*/
+         	, A.APP_CODE      	/*결재코드*/
+         	, A.VAC_START      	/*시작일*/
+         	, A.VAC_END      	/*종료일*/
+         	, A.VAC_TYPE      	/*휴가종류*/
+         	, A.VAC_CONTENT   	/*사유*/
+         	, A.VAC_TEL      	/*긴급연락처*/
+         	, A.VAC_DAY      	/*사용일수*/
+            , B.APP_DATE		/*작성일자*/
+            , B.EMP_NAME		/*작성자이름*/
+            , B.EMP_PV			/*잔여연차*/
+            , B.EMP_NO			/*결재자 번호*/
+            , E.EMP_NAME AS APL_NAME	/*결재자이름*/
+            , B.APL_NUM			/*결재순번*/
+            , B.APL_RESULT		/*결재자별 결재상태*/
+            , B.APL_COMMENT		/*반려사유*/
+        FROM VACATION A 
+        LEFT OUTER JOIN (SELECT 
+                            C.APP_DATE
+                            , C.APP_CODE
+                            , C.APF_CODE
+                            , D.EMP_NAME
+                            , D.EMP_PV
+                            , E.EMP_NO
+                            , E.APL_NUM
+                            , E.APL_RESULT
+                            , E.APL_COMMENT
+                        FROM APPROVAL C
+                        LEFT OUTER JOIN EMPLOYEE D
+                            ON C.EMP_NO = D.EMP_NO
+                        LEFT OUTER JOIN APLINE E
+                            ON C.APP_CODE = E.APP_CODE
+                        WHERE
+                            C.EMP_NO = #{empNo}) B 
+            ON A.APP_CODE = B.APP_CODE
+        LEFT OUTER JOIN EMPLOYEE E
+        	ON B.EMP_NO = E.EMP_NO
+        WHERE
+         A.APP_CODE = #{appCode}
+        ORDER BY B.APL_NUM ASC
+   </select>
+   
+   <select id="selectTest3" parameterType="string" resultType="AppVO">
+   	select * from APPROVAL where app_code = #{appCode}
+   </select>
+   <!-- ========================================   vacation Ing detail END =============================================== -->
+   
+   
+   
+   <!-- ========================================   recruit Ing detail  =============================================== -->
+   
+   <resultMap type="RecruitAppFormVO" id="appMap4">
+   	<collection property="recruit" resultMap="map14"/>
+   	<collection property="app" resultMap="map34"/>
+   	<collection property="emp" resultMap="map44"/>
+   	<collection property="apline" resultMap="map54"/>
+   </resultMap>
+   
+   <resultMap type="RecVO" id="map14">
+   	<result property="recCode" column="rec_code"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="depCode" column="dep_code"/>
+   	<result property="empPos" column="emp_pos"/>
+   	<result property="recReg" column="rec_reg"/>
+   	<result property="recName" column="rec_name"/>
+   	<result property="recAnn" column="rec_ann"/>
+   	<result property="recAcademy" column="rec_academy"/>
+   	<result property="recMajor" column="rec_major"/>
+   	<result property="recReason" column="rec_reason"/>
+   	<result property="recRec" column="rec_rec"/>
+   	<result property="recPcom" column="rec_pcom"/>
+   	<result property="recPpos" column="rec_ppos"/>
+   	<result property="recPdep" column="rec_pdep"/>
+   	<result property="recPperiod" column="rec_pperiod"/>
+   	<result property="recPann" column="rec_pann"/>
+   </resultMap>
+   
+   <resultMap type="AppVO" id="map34">
+   	<result property="appDate" column="app_date"/>
+   </resultMap>
+   
+   <resultMap type="empVO" id="map44">
+   	<result property="empName" column="emp_name"/>
+   </resultMap>
+   
+   <resultMap type="AplineVO" id="map54">
+   	<result property="empNo" column="emp_no"/>
+   	<result property="appCode" column="app_code"/>
+   	<result property="aplNum" column="apl_num"/>
+   	<result property="aplName" column="apl_name"/>
+   	<result property="aplResult" column="apl_result"/>
+   	<result property="aplComment" column="apl_comment"/>
+   </resultMap>
+   
+   <select id="selectRecruitIngForm" parameterType="AppVO" resultMap="appMap4">
+   /* kr.or.ddit.mapper.AppMapper.selectRecruitIngForm */
+   		SELECT
+   			A.REC_CODE
+            , A.APP_CODE
+            , A.DEP_CODE
+            , A.EMP_POS
+            , A.REC_REG
+            , A.REC_NAME
+            , A.REC_ANN
+            , A.REC_ACADEMY
+            , A.REC_MAJOR
+            , A.REC_REASON
+            , A.REC_REC
+            , A.REC_PCOM
+            , A.REC_PPOS
+            , A.REC_PDEP
+            , A.REC_PPERIOD
+            , A.REC_PANN
+            , B.APP_DATE		/*작성일자*/
+            , B.EMP_NAME		/*작성자이름*/
+            , B.EMP_NO			/*결재자 번호*/
+            , E.EMP_NAME AS APL_NAME	/*결재자이름*/
+            , B.APL_NUM			/*결재순번*/
+            , B.APL_RESULT
+            , B.APL_COMMENT
+        FROM RECRUIT A 
+        LEFT OUTER JOIN (SELECT 
+                            C.APP_DATE
+                            , C.APP_CODE
+                            , C.APF_CODE
+                            , D.EMP_NAME
+                            , E.EMP_NO
+                            , E.APL_NUM
+                            , E.APL_RESULT
+                            , E.APL_COMMENT
+                        FROM APPROVAL C
+                        LEFT OUTER JOIN EMPLOYEE D
+                            ON C.EMP_NO = D.EMP_NO
+                        LEFT OUTER JOIN APLINE E
+                            ON C.APP_CODE = E.APP_CODE
+                        WHERE
+                            C.EMP_NO = #{empNo}) B 
+            ON A.APP_CODE = B.APP_CODE
+        LEFT OUTER JOIN EMPLOYEE E
+        	ON B.EMP_NO = E.EMP_NO
+        WHERE
+         A.APP_CODE = #{appCode}
+         ORDER BY B.APL_NUM ASC
+   </select>
+   
+   <select id="selectTest4" parameterType="string" resultType="AppVO">
+   	select * from APPROVAL where app_code = #{appCode}
+   </select>
+   <!-- ========================================   recruit Ing detail END =============================================== -->
+   
+   
+   <delete id="approvalDelete">
+   		DELETE FROM APPROVAL
+   			WHERE APP_CODE = #{appCode}
+   </delete>
+   
+<!--    채용품의서 재기안 -->
+   <update id="recruitModify">
+   	UPDATE RECRUIT
+   	SET
+          EMP_POS = #{rec.empPos}       /*직급코드*/
+         , REC_REG = #{rec.recReg}       /*주민등록번호*/
+         , REC_NAME = #{rec.recName}       /*이름*/
+         , REC_ANN = #{rec.recAnn}       /*연봉*/
+         , REC_ACADEMY = #{rec.recAcademy}   /*학력*/
+         , REC_MAJOR = #{rec.recMajor}     /*전공*/
+         , REC_REASON = #{rec.recReason}    /*사유*/
+         , REC_REC = #{rec.recRec}       /*추천인*/
+         , REC_PCOM = #{rec.recPcom}      /*전직장명*/
+         , REC_PPOS = #{rec.recPpos}      /*전직급*/
+         , REC_PDEP = #{rec.recPdep}      /*전부서*/
+         , REC_PPERIOD = #{rec.recPperiod}   /*전직장근무기간*/
+         , REC_PANN = #{rec.recPann}      /*전연봉*/
+     WHERE APP_CODE = #{rec.appCode}
+   		
+   </update>
+   
+   <update id="appRecModify">
+   		UPDATE APPROVAL
+   		SET
+   			APP_DATE = SYSDATE
+   		WHERE APP_CODE = #{appCode}
+   			
+   </update>
+   
+   <update id="appLineRecModify" parameterType="String">
+   		UPDATE APLINE
+   		SET
+   			APL_RESULT = '0'
+   		WHERE APP_CODE = #{appCode}
+   </update>
+   
+   
+   
+   
+   
+   
+<!--    휴가신청서 재기안 -->
+   <update id="vacationModify">
+	   	UPDATE VACATION
+	   	SET
+	          VAC_START = #{vacation.vacStart}      /*시작일*/
+	         , VAC_END = #{vacation.vacEnd}      /*종료일*/
+	         , VAC_TYPE = #{vacation.vacType}      /*휴가종류*/
+	         , VAC_CONTENT = #{vacation.vacContent}   /*사유*/
+	         , VAC_TEL = #{vacation.vacTel}      /*긴습연락처*/
+	         , VAC_DAY = #{vacation.vacDay}      /*사용일수*/
+	     WHERE APP_CODE = #{vacation.appCode}
+   		
+   </update>
+   
+   <update id="appVacModify">
+   		UPDATE APPROVAL
+   		SET
+   			APP_DATE = SYSDATE
+   		WHERE APP_CODE = #{appCode}
+   			
+   </update>
+   
+   <update id="appLineVacModify" parameterType="String">
+   		UPDATE APLINE
+   		SET
+   			APL_RESULT = '0'
+   		WHERE APP_CODE = #{appCode}
+   </update>
+</mapper>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.CommentMapper">
+
+	<insert id="insertComm" parameterType="commVO" >
+		<selectKey keyProperty="commCode" resultType="string" order="BEFORE">
+			SELECT 'COMM'||COMM_SEQ.NEXTVAL FROM DUAL
+		</selectKey>	
+		insert into comm
+			(COMM_CODE, EMP_NO, COMM_TYPE, COMM_CONTENT, COMM_DATE, COMM_PATH)
+		values
+		(#{commCode},#{empNo},#{commType},#{commContent},sysdate,null)
+	</insert>
+
+
+
+
+
+
+
+
+	<resultMap type="commVO" id="commMap">
+		<result property="commCode" column="comm_code" /> 
+		<result property="empNo" column="emp_no" /> 
+		<result property="commType" column="comm_type" /> 
+		<result property="commContent" column="comm_content" /> 
+		<result property="commDate" column="comm_date" /> 
+		<result property="commPath" column="comm_path" /> 
+		
+		<collection property="empVO" resultMap="empMap"></collection>
+		<collection property="afVO" resultMap="afMap"></collection>
+	</resultMap>
+
+	<resultMap type="empVO" id="empMap">
+		<result property="empName" column="emp_name" /> 
+		<result property="empPos" column="emp_pos" /> 
+	</resultMap>
+	<resultMap type="afVO" id="afMap">
+		<result property="afSave" column="af_save" /> 
+	</resultMap>
+	
+	<!-- 특정 게시물 댓글 조회 + 사원 정보 -->
+	<select id="list" resultMap="commMap">
+		SELECT 
+			  C.COMM_CODE /* 댓글코드 */
+			, C.EMP_NO /* 댓글작성사번 */
+			, C.COMM_TYPE /* 댓글업무구분 */
+			, C.COMM_CONTENT /* 내용 */
+			, C.COMM_DATE /* 생성일 */
+			, C.COMM_PATH /* 경로 */
+		    , E.EMP_NAME /* 사원이름 */
+		    , E.EMP_POS /* 사원직급 */
+		    , A.AF_SAVE /* 저장이름 */			
+		FROM COMM C
+		LEFT OUTER JOIN EMPLOYEE E ON(E.EMP_NO = C.EMP_NO)		
+		LEFT OUTER JOIN ATTFILE A ON(A.AF_TCODE = C.EMP_NO AND A.AF_TYPE = 'PROFILE')		
+		WHERE 1=1 
+		AND C.COMM_TYPE = #{commType}
+		ORDER BY C.COMM_CODE
+	</select>
+
+<update id="updateComm" parameterType="commVO">
+update comm
+set 
+	EMP_NO = #{empNo},
+	COMM_TYPE = #{commType},
+	COMM_CONTENT = #{commContent},
+	COMM_DATE = sysdate,
+	COMM_PATH = NULL
+where COMM_CODE = #{commCode}
+
+</update>
+
+<delete id="deleteComm" parameterType="commVO">
+delete from comm
+where COMM_CODE = #{commCode}
+</delete>
+
+	<select id="getComm" resultType="commVO">
+		SELECT
+			  COMM_CODE /* 댓글코드 */
+			, EMP_NO /* 댓글작성사번 */
+			, COMM_TYPE /* 댓글업무구분 */
+			, COMM_CONTENT /* 내용 */
+			, COMM_DATE /* 생성일 */
+			, COMM_PATH /* 경로 */
+		FROM COMM
+		WHERE
+			COMM_TYPE = #{commType} /* 댓글업무구분 */
+	</select>	
+
+
+
+
+
+
+	<!--
+	<insert id="insertNotice" parameterType="noticeVO" useGeneratedKeys="true">
+		<selectKey keyProperty="boNo" resultType="int" order="BEFORE">
+			select seq_notice.nextval from dual
+		</selectKey>
+		insert into notice(
+			bo_no,bo_title,bo_content,bo_writer,bo_date
+		) values (
+			#{boNo},#{boTitle},#{boContent},#{boWriter},sysdate
+		)
+	</insert>	
+	
+	<update id="updateNotice" parameterType="noticeVO">
+		update notice
+		set
+			bo_title = #{boTitle},
+			bo_content = #{boContent},
+			bo_date = sysdate
+		where bo_no = #{boNo}
+	</update>
+	
+	<delete id="deleteNotice" parameterType="int">
+		delete from notice
+		where bo_no = #{boNo}
+	</delete>	
+	-->
+</mapper>
+
+
+
+
+
+

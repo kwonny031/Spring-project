@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.EmployeeMapper">
+
+	<select id="getEmp" resultType="empVO">
+		select
+			EMP_NO, CO_CODE, DEP_CODE, EMP_POS, EMP_NAME, EMP_REG, EMP_POSTCODE, EMP_ADDR, 
+			EMP_ADDR2, EMP_DATE, EMP_EMAIL, EMP_TEL, EMP_PW, EMP_MSG, EMP_PV, EMP_RDATE			
+		from employee
+		where
+			EMP_NO = #{empNo}
+	</select>
+
+	<select id="loginCheck" resultType="empVO">
+		select
+			EMP_NO, CO_CODE, DEP_CODE, EMP_POS, EMP_NAME, EMP_REG, EMP_POSTCODE, EMP_ADDR, 
+			EMP_ADDR2, EMP_DATE, EMP_EMAIL, EMP_TEL, EMP_PW, EMP_MSG, EMP_PV, EMP_RDATE					
+		from employee
+		where
+			EMP_NO = #{empNo}
+		and
+			EMP_PW = #{empPw}
+	</select>
+
+	<select id="list" resultType="empVO">
+	select 
+    	  a.EMP_NO
+    	, a.CO_CODE
+    	, a.DEP_CODE
+    	, a.EMP_POS
+    	, a.EMP_NAME
+    	, a.EMP_POSTCODE
+    	, a.EMP_ADDR
+    	, a.EMP_DATE
+    	, a.EMP_EMAIL
+    	, a.EMP_TEL
+    	, b.DEP_NAME
+    	, (case b.EMP_NO when '20020001' then '#' else b.EMP_NO end) as HEmpNo	/* 부서장 사번 */
+	from employee a, dep b
+	where a.DEP_CODE = b.DEP_CODE
+	</select>
+
+
+
+	<resultMap type="empVO" id="empMap">
+		<result property="empName" column="emp_name"/>
+		<result property="empPos" column="emp_pos"/>
+		<result property="empTel" column="emp_tel"/>
+		<result property="empEmail" column="emp_email"/>
+		
+		<collection property="afVO" resultMap="afMap"></collection>
+	</resultMap>
+
+	<resultMap type="afVO" id="afMap">
+		<result property="afSave" column="af_save"/>
+	</resultMap>
+
+	<select id="selectMember" parameterType="string" resultMap="empMap">
+		SELECT
+			  E.EMP_NO /* 사원번호 */
+			, E.EMP_POS /* 직급코드 */
+			, E.EMP_NAME /* 사원이름 */
+			, E.EMP_EMAIL /* 사원이메일 */
+			, E.EMP_TEL /* 사원전화번호 */
+			, A.AF_SAVE /* 저장이름 */			
+		FROM EMPLOYEE E
+		LEFT OUTER JOIN ATTFILE A ON(E.EMP_NO = A.AF_TCODE AND A.AF_TYPE = 'PROFILE')
+		WHERE
+			E.EMP_NO = #{empNo}
+	</select>
+	
+	<!-- 전체 사원목록 조회 -->
+	<select id="getEmpList" resultType="empVO">
+		/* kr.or.ddit.mapper.EmployeeMapper */
+		SELECT
+			  EMP_NO 		/* 사원코드 */ 
+			, CO_CODE 		/* 회사코드 */
+			, DEP_CODE 		/* 부서코드 */
+			, EMP_POS 		/* 직급코드 */
+			, EMP_NAME  	/* 사원이름 */
+			, EMP_REG 		/* 주민등록번호 */
+			, EMP_POSTCODE  /* 우편번호 */
+			, EMP_ADDR 		/* 기본주소 */
+			, EMP_ADDR2 	/* 상세주소 */
+			, EMP_DATE 		/* 입사일 */
+			, EMP_EMAIL 	/* 사원메일 */
+			, EMP_TEL 		/* 핸드폰번호 */
+			, EMP_PW 		/* 비밀번호 */
+			, EMP_MSG 		/* 상태메세지 */
+			, EMP_PV 		/* 연차 */
+			, EMP_RDATE 	/* 퇴사일 */	
+		FROM EMPLOYEE
+	</select>
+	
+	<select id="getEmpByEmpName" resultType="empVO">
+		SELECT
+			  EMP_NO 		/* 사원코드 */ 
+			, CO_CODE 		/* 회사코드 */
+			, DEP_CODE 		/* 부서코드 */
+			, EMP_POS 		/* 직급코드 */
+			, EMP_NAME  	/* 사원이름 */
+			, EMP_REG 		/* 주민등록번호 */
+			, EMP_POSTCODE  /* 우편번호 */
+			, EMP_ADDR 		/* 기본주소 */
+			, EMP_ADDR2 	/* 상세주소 */
+			, EMP_DATE 		/* 입사일 */
+			, EMP_EMAIL 	/* 사원메일 */
+			, EMP_TEL 		/* 핸드폰번호 */
+			, EMP_PW 		/* 비밀번호 */
+			, EMP_MSG 		/* 상태메세지 */
+			, EMP_PV 		/* 연차 */
+			, EMP_RDATE 	/* 퇴사일 */	
+		FROM EMPLOYEE	
+		WHERE 
+			EMP_NAME = #{empName} /* 사원이름 */
+	</select>
+	
+	<!-- 부서코드로 사원 목록 조회 -->
+	<select id="getEmpListByDep" resultType="empVO">
+		SELECT
+			  EMP_NO 		/* 사원코드 */ 
+			, CO_CODE 		/* 회사코드 */
+			, DEP_CODE 		/* 부서코드 */
+			, EMP_POS 		/* 직급코드 */
+			, EMP_NAME  	/* 사원이름 */
+			, EMP_REG 		/* 주민등록번호 */
+			, EMP_POSTCODE  /* 우편번호 */
+			, EMP_ADDR 		/* 기본주소 */
+			, EMP_ADDR2 	/* 상세주소 */
+			, EMP_DATE 		/* 입사일 */
+			, EMP_EMAIL 	/* 사원메일 */
+			, EMP_TEL 		/* 핸드폰번호 */
+			, EMP_PW 		/* 비밀번호 */
+			, EMP_MSG 		/* 상태메세지 */
+			, EMP_PV 		/* 연차 */
+			, EMP_RDATE 	/* 퇴사일 */	
+		FROM EMPLOYEE	
+		WHERE 
+			DEP_CODE = #{depCode} /* 부서코드 */
+	
+	</select>
+
+	<select id="idFind" parameterType="empVO" resultType="string">
+		select EMP_NO from employee
+		where EMP_EMAIL = #{empEmail}
+		and EMP_NAME = #{empName}
+	</select>
+
+	<select id="pwFind" parameterType="empVO" resultType="string">
+		select EMP_PW from employee
+		where EMP_EMAIL = #{empEmail}
+		and EMP_NAME = #{empName}
+		and EMP_NO = #{empNo}
+	</select>
+
+
+	<insert id="register" parameterType="empVO">
+<!-- 	<selectKey keyProperty="empNo" resultType="string" order="BEFORE"> -->
+<!-- 		select EMP_SEQ.NEXTVAL FROM DUAL -->
+<!-- 	</selectKey> -->
+	insert into employee
+		(EMP_NO, CO_CODE, DEP_CODE, EMP_POS, EMP_NAME, EMP_REG, EMP_POSTCODE, EMP_ADDR, EMP_ADDR2, EMP_DATE, EMP_EMAIL, EMP_TEL, EMP_PW, EMP_MSG, EMP_PV, EMP_RDATE, SIGN_IMG_URL)
+	VALUES
+		(#{empNo},'CO1','DEP22',#{empPos},#{empName},#{empReg},#{empPostcode},#{empAddr},#{empAddr2},#{empDate},#{empEmail},#{empTel},#{empPw},#{empMsg},'15',SYSDATE,null)
+	</insert>
+
+
+
+	<select id="listAdmin" resultType="empVO">
+		select EMP_NO, CO_CODE, DEP_CODE, EMP_POS, EMP_NAME, EMP_REG, EMP_POSTCODE, EMP_ADDR, EMP_ADDR2, EMP_DATE, EMP_EMAIL, EMP_TEL, EMP_PW, EMP_MSG, EMP_PV, EMP_RDATE, SIGN_IMG_URL
+		from employee
+		order by EMP_NO DESC
+	</select>
+
+
+	<select id="getEmpNo" resultType="empVO">
+	select
+			EMP_NO, CO_CODE, DEP_CODE, EMP_POS, EMP_NAME, EMP_REG, EMP_POSTCODE, EMP_ADDR, 
+			EMP_ADDR2, EMP_DATE, EMP_EMAIL, EMP_TEL, EMP_PW, EMP_MSG, EMP_PV, EMP_RDATE			
+		from employee
+		where
+			EMP_NO = #{empNo}
+	</select>
+
+	<update id="update" parameterType="empVO">
+		UPDATE EMPLOYEE
+			SET DEP_CODE = #{depCode}, 
+				EMP_POS = #{empPos}, 
+				EMP_NAME = #{empName}, 
+				EMP_REG = #{empReg}, 
+				EMP_EMAIL = #{empEmail}, 
+				EMP_PW = #{empPw}, 
+				EMP_TEL = #{empTel} 
+		WHERE EMP_NO = #{empNo}
+	</update>
+
+	<!-- 사원이 작성한 모든 게시물 수 조회 -->
+	<select id="getAllPostCount" resultType="int">
+		/* kr.or.ddit.mapper.EmployeeMapper.getAllPostCount */
+		SELECT   
+		    SUM(A)
+		FROM (
+		    SELECT 
+		        COUNT(EMP_NO) AS A
+		    FROM COMM
+		    WHERE
+		        EMP_NO = #{empNo} 
+		    UNION
+		    
+		    SELECT 
+		        COUNT(EMP_NO) AS A
+		    FROM FREE
+		    WHERE
+		        EMP_NO = #{empNo}
+		    UNION
+		    
+		    SELECT 
+		        COUNT(EMP_NO) AS A
+		    FROM SCHEDULE
+		    WHERE
+		        EMP_NO = #{empNo}
+		    UNION
+		    
+		    SELECT 
+		        COUNT(EMP_NO) AS A
+		    FROM APPROVAL
+		    WHERE
+		        EMP_NO = #{empNo}
+		    UNION
+		    
+		    SELECT 
+		        COUNT(EMP_NO) AS A
+		    FROM NOTICE
+		    WHERE
+		        EMP_NO = #{empNo}
+		)		
+	</select>
+
+	<!-- 사원이 받은 좋아요 수 -->
+	<select id="getAllGoodCount" resultType="int">
+		SELECT
+		    COUNT(F.EMP_NO)
+		FROM FREE F, (SELECT
+		                GOOD_TYPE
+		              FROM GOOD) A
+		WHERE A.GOOD_TYPE = F.FREE_CODE
+		AND F.EMP_NO = #{empNo}
+	</select>
+
+
+
+</mapper>
+
+
+
+

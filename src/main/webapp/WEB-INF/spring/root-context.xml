@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xmlns:aop="http://www.springframework.org/schema/aop"
+   xmlns:context="http://www.springframework.org/schema/context"
+   xmlns:task="http://www.springframework.org/schema/task"
+   xmlns:tx="http://www.springframework.org/schema/tx"
+   xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+      http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+   <!--  어노테이션 설정 가능 -->
+   <context:annotation-config />
+   <task:annotation-driven/>
+   <!-- Root Context: defines shared resources visible to all other web components -->
+   <!-- 
+      root-context.xml : 스프링 설정을 위한 파일
+      
+      스프링 설정이란?
+      - view와 관련되지 않은 객체를 정의
+      - service(비즈니스 기능), dao(repository: 저장소), DB등 비즈니스 로직과 관련된 설정
+      - BasicDataSource dataSource = new BasicDataSource();
+      dataSource.setDriverClassName() = "oracle.jdbc.driver.OracleDriver";
+    -->   
+    
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+       <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"></property>
+       <property name="url" value="jdbc:oracle:thin:@112.220.114.130:1521:xe"></property>
+       <property name="username" value="team1_202210F"></property>
+       <property name="password" value="java"></property>
+    </bean>
+    
+    <!-- 데이터베이스와 연결을 맺고 끊어질 때까지의 라이프 사이클을 관리해주는 SqlSession 객체를 생성
+    1) dataSource
+    2) Mapper xml의 위치 지정
+    - src/main/resources/ -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+       <property name="dataSource" ref="dataSource"></property>
+       <property name="mapperLocations" value="classpath:/sqlmap/**/*_SQL.xml"></property>
+       <property name="configLocation" value="/WEB-INF/mybatisAlias/mybatisAlias.xml"></property>
+    </bean>
+    
+    <!-- 데이터베이스에 개별적으로 쿼리를 실행시키는 객체. 이 객체를 통해서 query를 실행한다. -->
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+       <constructor-arg name="sqlSessionFactory" index="0" ref="sqlSessionFactory"></constructor-arg>
+    </bean>
+    
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+       <property name="basePackage" value="kr.or.ddit.mapper"></property>
+    </bean>
+    
+    <bean id="uploadPath" class="java.lang.String">
+       <constructor-arg value="C:\Users\kwonn\Documents\FinalProject\KUROOffice\src\main\webapp\resources\images"/>
+    </bean>
+    
+    <!-- CommonsMultipartResolver 사용 시 설정 -->
+<!--     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"> -->
+<!--        <property name="maxUploadSize" value="10485760"></property> -->
+<!--        <property name="defaultEncoding" value="utf-8"></property> -->
+<!--     </bean> -->
+    
+    <!-- 스프링 AOP 활성화 -->
+<!--     <aop:aspectj-autoproxy/> -->
+    
+<!--     <context:component-scan base-package="kr.or.ddit.aop"/> -->
+<!--     <context:component-scan base-package="kr.or.ddit.service"/> -->
+    
+    <!-- 트랜잭션 설정 -->
+<!--     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"> -->
+<!--        <property name="dataSource" ref="dataSource"></property> -->
+<!--     </bean> -->
+    
+    <!-- 어노테이션 기반의 트랜잭션 제어를 활성화합니다. -->
+<!--     <tx:annotation-driven/> -->
+    
+    <!-- gmail설정 -->
+   <bean id="mailSender"
+      class="org.springframework.mail.javamail.JavaMailSenderImpl">
+      <property name="host" value="smtp.gmail.com" />
+      <property name="port" value="587" />
+      <property name="username" value="hee822090@gmail.com" /> <!-- 자신의 이메일 아이디 -->
+      <property name="password" value="lngocxoylokqtsea" /> <!-- 자신의 비밀번호 -->
+      <!-- 보안연결 TLS과 관련된 설정 -->
+      <property name="javaMailProperties">
+         <props>
+            <prop key="mail.smtp.auth">true</prop>
+            <prop key="mail.smtp.starttls.enable">true</prop>
+         </props>
+      </property>
+   </bean>
+    
+
+</beans>
+
+
+
+
+
+
+
+
+
+
+
+
+

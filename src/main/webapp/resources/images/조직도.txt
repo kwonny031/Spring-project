@@ -1,0 +1,48 @@
+$.ajax({
+			url:"/emp/home",
+			type:"post",
+			success: function(data){
+				console.log("data >>> ", JSON.stringify(data));
+				console.log("data >>> ", JSON.parse(JSON.stringify(data)));
+				console.log("parent ID >> ", data[0].id);
+
+// 				var data = "";
+// 				data += '[';
+// 				for(var i=0; i < JSON.parse(JSON.stringify(data)).length; i++){
+// 					data += '{';
+// 					data += '	id: JSON.parse(JSON.stringify(data)).id,';
+// 					data += '	parent: JSON.parse(JSON.stringify(data)).parent,';
+// 					data += '	text: JSON.parse(JSON.stringify(data)).text,';
+// 					data += '	depName: JSON.parse(JSON.stringify(data)).depName,';
+// 					data += '	empEmail: JSON.parse(JSON.stringify(data)).empEmail,';
+// 					data += '	empTel: JSON.parse(JSON.stringify(data)).empTel,';
+// 					data += '	empPos: JSON.parse(JSON.stringify(data)).empPos';
+// 					data += '},';
+// 		    	}
+// 	    		data += ']';
+				
+				$("#tree").jstree({ 
+					  'core' : {
+					    'data' : 
+// 					    	[
+// 				 	 	      { "id" : "DEP1", "parent" : "#", "text" : "임원진" },
+// 				 	 	      { "id" : "DEP2", "parent" : "#", "text" : "기술지원본부" },
+// 				 	 	      { "id" : "DEP3", "parent" : "#", "text" : "영업부" },
+// 				 	 	      { "id" : "DEP4", "parent" : "#", "text" : "관리본부" },
+// 				 	 	     ] 
+					    	JSON.stringify(data).toString()
+					  }
+				});
+				
+				$('#tree').on("changed.jstree", function (e, data) {
+				      console.log("data.selected : ", data.selected);
+				    });
+					
+					$('button').on('click', function () {
+				      $('#tree').jstree(true).select_node('child_node_1');
+				      $('#tree').jstree('select_node', 'child_node_1');
+				      $.jstree.reference('#tree').select_node('child_node_1');
+				    });
+// 				$('#tree').jstree(data); 
+			}
+		});

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.ddit.mapper.CloudMapper">
+
+	<!-- 기본 클라우드 조회 (개인 클라우드)-->
+	<select id="empCloud" parameterType="String" resultType="cloudVO">
+		/* kr.or.ddit.mapper.CloudMapper.list */
+		select 
+     		  CLO_CODE   	/* 클라우드 코드 */
+     		, EMP_NO        /* 사원번호 */
+     		, CLO_MAX       /* 최대용량 (단위 GB) */
+     		, CLO_USE       /* 사용용량 (단위 GB) */
+     		, DEP_CODE      /* 부서코드 */
+		 from cloud
+		where EMP_NO = #{empNo}
+	</select>
+	
+	<!-- 기본 클라우드 조회 (부서 클라우드) -->
+	<select id="depCloud" parameterType="String" resultType="cloudVO">
+		/* kr.or.ddit.mapper.CloudMapper.depCloud */
+		select
+		       a.CLO_CODE     /* 클라우드 코드 */
+		     , a.EMP_NO       /* 사원번호 */
+		     , a.CLO_MAX      /* 최대용량 (단위 GB) */
+		     , a.CLO_USE      /* 사용용량 (단위 GB) */
+		     , b.DEP_CODE     /* 부서코드 */
+		     , c.DEP_NAME     /* 부서이름 */
+		 from cloud a, employee b, dep c
+		where a.DEP_CODE = #{depCode}
+		and a.EMP_NO = b.EMP_NO
+		and b.DEP_CODE = c.DEP_CODE
+	</select>
+	
+	<!-- 부서 자료실 목록 조회 -->
+	<select id="depFolderList" parameterType="String" resultType="cloudVO">
+		/* kr.or.ddit.mapper.CloudMapper.depFolderList */
+		select
+		        FOL_CODE        /* 폴더코드 */
+		      , a.CLO_CODE      /* 클라우드 코드 */
+		      , FOL_PARCODE     /* 상위 폴더 코드 */
+		      , FOL_NAME        /* 폴더명 */
+		      , FOL_DATE        /* 생성일 */
+		      , FOL_USE         /* 사용용량 */
+		      , FOL_FAV         /* 즐겨찾기 여부 */
+		 from folder a, cloud b
+		where b.DEP_CODE = #{depCode}
+		  and a.CLO_CODE = b.CLO_CODE
+	</select>
+	
+	<!-- 개인 자료실 목록 조회 -->
+	<select id="empFolderList" parameterType="String" resultType="cloudVO">
+		/* kr.or.ddit.mapper.CloudMapper.empFolderList */
+		select
+		        FOL_CODE        /* 폴더코드 */
+		      , a.CLO_CODE      /* 클라우드 코드 */
+		      , FOL_PARCODE     /* 상위 폴더 코드 */
+		      , FOL_NAME        /* 폴더명 */
+		      , FOL_DATE        /* 생성일 */
+		      , FOL_USE         /* 사용용량 */
+		      , FOL_FAV         /* 즐겨찾기 여부 */
+		 from folder a, cloud b
+		where b.EMP_NO = #{empNo}
+		  and a.CLO_CODE = b.CLO_CODE
+	</select>
+	
+	<!-- 폴더 코드 찾기 -->
+	<select id="searchFolCode" parameterType="String" resultType="String">
+		/* kr.or.ddit.mapper.searchFolCode */
+		select 
+		       FOL_CODE
+		  from folder
+		 where FOL_NAME=#{folNmae}
+	</select>
+	
+	<!-- 부서 자료실 상위 폴더 생성 -->
+	<insert id="createParentFolder" parameterType="cloudVO">
+		/* kr.or.ddit.mapper.CloudMapper. */
+		insert into FOLDER
+		    (   
+		          FOL_CODE      /* 폴더코드 */
+		        , CLO_CODE      /* 클라우드코드 */
+		        , FOL_NAME      /* 폴더명 */
+		        , FOL_DATE      /* 생성일 */
+		        , FOL_FAV       /* 즐겨찾기여부 */
+		    )
+		values
+		    (
+		         ('FOL'||FOLDER_SEQ.nextval)
+		        , #{cloCode}
+		        , #{folName}
+		        , sysdate
+		        , 'N'
+		    )
+	</insert>
+	
+	
+	<!-- 부서 자료실 하위 폴더 생성 -->
+	<insert id="createChildFolder" parameterType="cloudVO">
+		/* kr.or.ddit.mapper.CloudMapper.createChildFolder */
+		insert into folder
+	    (
+	          FOL_CODE      /* 폴더코드 */
+	        , CLO_CODE      /* 클라우드코드 */
+	        , FOL_PARCODE   /* 상위폴더코드 */
+	        , FOL_NAME      /* 폴더명 */
+	        , FOL_DATE      /* 생성일 */
+	        , FOL_USE		/* 사용용량 */
+	        , FOL_FAV       /* 즐겨찾기여부 */
+	    )
+		values
+	   	(
+	          ('FOL'||FOLDER_SEQ.nextval)
+	        , #{cloCode}
+	        , #{folParcode}
+	        , #{folName}
+	        , sysdate
+	        , #{folUse}
+	        , 'N'
+	    )
+	</insert>
+	
+	<!-- 신규사원 등록시 개인 클라우드 폴더 생성 -->
+	<insert id="register" parameterType="String">
+		/* kr.or.ddit.mapper.CloudMapper.register */
+		insert into cloud
+		(
+		      CLO_CODE
+		    , EMP_NO
+		    , CLO_MAX
+		    , CLO_USE
+		)
+		values
+		(
+		      ('CLO'||clo_seq.nextval)
+		    , #{empNo}
+		    , '5.0'
+		    , '0'
+		)
+	</insert>
+	
+	
+</mapper>
+
+
+
+
+
+

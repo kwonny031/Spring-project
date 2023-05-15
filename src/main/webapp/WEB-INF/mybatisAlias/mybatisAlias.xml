@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+   <!-- 
+      [마이바티스] 스프링에서 "_"를 사용하는 컬럼명을 사용 시, (BOOK 테이블의 BOOK_ID)카멜 케이
+      스로 읽어줍니다.(bookId)
+      ex) 테이블 컬럼명이 member_id인 경우 jsp 화면단에서 이 값을 사용 시, memberId로 사용.
+    -->
+   <settings>
+      <setting name="mapUnderscoreToCamelCase" value="true"/>
+   </settings>
+   
+   <!-- 
+      자주 사용하는 타입의 별칭을 세팅
+      xml에서 사용하는 자바빈즈 클래스의 별칭들을 세팅. 
+    -->
+    <typeAliases>
+		<typeAlias type="kr.or.ddit.employee.vo.EmployeeVO" alias="empVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.VacationVO" alias="VacationVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.VacationFormVO" alias="VacationFormVO"/>
+		<typeAlias type="kr.or.ddit.timeline.vo.TimelineVO" alias="timVO"/>
+		<typeAlias type="kr.or.ddit.comment.vo.CommentVO" alias="commVO"/>
+		<typeAlias type="kr.or.ddit.attfile.vo.AttFileVO" alias="aFVO"/>
+		<typeAlias type="kr.or.ddit.free.vo.FreeVO" alias="freeVO"/>
+		<typeAlias type="kr.or.ddit.good.vo.GoodVO" alias="goodVO"/>
+		<typeAlias type="kr.or.ddit.common.vo.ComCodeVO" alias="ccVO"/>
+		<typeAlias type="kr.or.ddit.schedule.vo.ScheduleVO" alias="schVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.ApFormVO" alias="ApFormVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.RecVO" alias="RecVO"/>
+		<typeAlias type="kr.or.ddit.message.vo.MessageVO" alias="MessageVO"/>
+		<typeAlias type="kr.or.ddit.message.vo.MesrecVO" alias="MesrecVO"/>
+		<typeAlias type="kr.or.ddit.dep.vo.DepVO" alias="depVO"/>
+		<typeAlias type="kr.or.ddit.schedule.vo.SchEmpVO" alias="schEmpVO"/>
+		<typeAlias type="kr.or.ddit.work.vo.WorkVO" alias="workVO"/>
+		<typeAlias type="kr.or.ddit.contact.vo.ContactVO" alias="contactVO"/>
+		<typeAlias type="kr.or.ddit.schedule.vo.MroomVO" alias="roomVO"/>
+		<typeAlias type="kr.or.ddit.board.vo.BoardVO" alias="boaVO"/>
+		<typeAlias type="kr.or.ddit.board.vo.BoardFavoriteVO" alias="bfVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.AppVO" alias="AppVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.AplineVO" alias="AplineVO"/>
+		<typeAlias type="kr.or.ddit.board.vo.PostVO" alias="postVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.RecruitFormVO" alias="RecruitFormVO"/>
+		<typeAlias type="kr.or.ddit.schedule.vo.CarVO" alias="carVO"/>
+		<typeAlias type="kr.or.ddit.notice.vo.NoticeVO" alias="NoticeVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.VacationAppFormVO" alias="VacationAppFormVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.AplineUpdateVO" alias="AplineUpdateVO"/>
+		<typeAlias type="kr.or.ddit.mail.vo.MailVO" alias="mailVO"/>
+		<typeAlias type="kr.or.ddit.mail.vo.MailRecVO" alias="mailRecVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.RecruitAppFormVO" alias="RecruitAppFormVO"/>
+		<typeAlias type="kr.or.ddit.approval.vo.AppIngVO" alias="AppIngVO"/>
+		<typeAlias type="kr.or.ddit.cloud.vo.CloudVO" alias="cloudVO"/>
+		<typeAlias type="kr.or.ddit.cloud.vo.FolderVO" alias="folderVO"/>
+		<typeAlias type="kr.or.ddit.mail.vo.SaveMailVO" alias="saveMailVO"/>
+		<typeAlias type="kr.or.ddit.alert.vo.AlertVO" alias="aleVO"/>
+
+
+    </typeAliases>
+</configuration>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
